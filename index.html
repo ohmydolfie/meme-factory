@@ -208,6 +208,36 @@
             display: block;
         }
 
+        /* ── Mobile Responsiveness ── */
+        @media (max-width: 768px) {
+            .scene {
+                flex-direction: column;
+                overflow-y: auto;
+                height: 100vh;
+            }
+            .pane {
+                width: 100% !important;
+                height: auto !important;
+                min-height: auto;
+                overflow-y: visible;
+            }
+            .big-title { font-size: 2.2rem; }
+            .big-title-ko { font-size: 1.8rem; }
+            .sub-text { font-size: 1.2rem; }
+            
+            .archive-grid.grid-cols-full {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .archive-grid.grid-cols-half {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .content-body { padding: 30px 15px; }
+            
+            /* Home page specific mobile fix */
+            #scene-home .pane { height: 100vh !important; }
+        }
+
 
         .btn-large {
             display: flex;
