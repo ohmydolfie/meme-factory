@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>meme factory</title>
+    <!-- Firebase Libraries (Compat v9+) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <!-- Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Anton&family=Bangers&family=Black+Han+Sans&family=Do+Hyeon&family=Gamja+Flower&family=Gothic+A1:wght@900&family=Hi+Melody&family=Jua&family=Lobster&family=Nanum+Brush+Script&family=Nanum+Pen+Script&family=Noto+Sans+KR:wght@900&family=Oswald:wght@700&family=Pacifico&family=Permanent+Marker&family=Press+Start+2P&family=Righteous&family=Roboto+Condensed:wght@700&family=Song+Myung&family=Yeon+Sung&family=Nanum+Gothic:wght@800&family=Nanum+Myeongjo:wght@800&family=Poor+Story&family=Single+Day&family=Sunflower:wght@700&family=Gaegu&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --white: #FFFFFF;
+            --black: #000000;
+            --bar-height: 46px;
+            --ui-font-size: 1.1rem;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Arial Narrow", Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            outline: none !important;
+        }
+
+        body,
+        html {
+            width: 100%;
+            height: 100vh;
+            color: var(--black);
+            overflow: hidden;
+            background: #fff;
+            -webkit-font-smoothing: antialiased;
+            text-transform: lowercase;
+        }
+
+
+        .scene {
+            display: none;
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        .scene.active {
+            display: flex;
+        }
+
+
+        .pane {
+            flex: 1;
+            height: 100vh;
+            overflow-y: auto;
+            position: relative;
+            scrollbar-width: none;
+            transition: background-color 0.4s ease-out, width 0.3s ease;
+        }
+
+        .pane::-webkit-scrollbar {
+            display: none;
+        }
+
+
+        .top-bar-area {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 15px;
+            position: sticky;
+            top: 0;
+            z-index: 2000;
+        }
+
+        .nav-pill-wrapper {
+            position: relative;
+            flex: 1;
+        }
+
+        .white-pill {
+            background: var(--white);
+            border-radius: 50px;
+            height: var(--bar-height);
+            padding: 0 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: var(--ui-font-size);
+            cursor: pointer;
+            width: 100%;
+            border: none;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 50px;
+            left: 0;
+            width: 100%;
+            background: var(--white);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            z-index: 3000;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 12px 18px;
+            font-size: var(--ui-font-size);
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .dropdown-item:hover {
+            background: #f9f9f9;
+        }
+
+
+        .control-btns {
+            display: flex;
+            gap: 6px;
+        }
+
+        .circle-btn {
+            background: #fff;
+            border: none;
+            width: var(--bar-height);
+            height: var(--bar-height);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: var(--black);
+        }
+
+
+        .content-body {
+            padding: 40px 20px;
+            position: relative;
+            z-index: 5;
+        }
+
+        .big-title {
+            font-size: 3.2rem;
+            line-height: 1.1;
+            letter-spacing: -1.5px;
+            margin-bottom: 15px;
+            font-weight: normal;
+        }
+
+        .big-title-ko {
+            font-size: 2.6rem;
+            line-height: 1.2;
+            letter-spacing: -1px;
+            margin-bottom: 30px;
+            font-weight: normal;
+            word-break: keep-all;
+        }
+
+        .sub-text {
+            font-size: 1.8rem;
+            line-height: 1.5;
+            margin-bottom: 20px;
+            font-weight: normal;
+            word-break: keep-all;
+        }
+
+        .highlight {
+            background: #fff;
+            color: #000;
+            padding: 0 4px;
+            display: inline;
+        }
+
+
+        .create-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            padding: 20px;
+            width: 100%;
+        }
+
+        .create-template-card {
+            width: 100%;
+            aspect-ratio: 1/1;
+            background: #eee;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .create-template-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+
+        .btn-large {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 40px;
+            border-radius: 50px;
+            background: var(--white);
+            border: none;
+            font-size: var(--ui-font-size);
+            cursor: pointer;
+            margin-top: 20px;
+            height: var(--bar-height);
+            font-weight: normal;
+            position: relative;
+            z-index: 6;
+        }
+
+
+        .archive-grid {
+            display: grid;
+            gap: 15px;
+            padding: 0 20px 40px 20px;
+            position: relative;
+            z-index: 100;
+        }
+
+        .grid-cols-full {
+            grid-template-columns: repeat(5, 1fr);
+        }
+
+        .grid-cols-half {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+
+        .nick-card {
+            background: transparent !important;
+            border: none !important;
+            font-size: var(--ui-font-size);
+            line-height: 1.2;
+            padding: 5px 0;
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+
+        .editor-box {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding: 0 20px 60px 20px;
+            align-items: center;
+        }
+
+        .input-pill {
+            width: 100%;
+            max-width: 400px;
+            padding: 0 20px;
+            border-radius: 50px;
+            border: none;
+            font-size: var(--ui-font-size);
+            height: var(--bar-height);
+        }
+
+        .style-group {
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .style-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .color-input-hidden {
+            width: 32px;
+            height: 32px;
+            border: none;
+            cursor: pointer;
+            background: none;
+        }
+
+        .font-select {
+            background: white;
+            border: none;
+            border-radius: 50px;
+            padding: 0 20px;
+            font-size: var(--ui-font-size);
+            width: 100%;
+            height: var(--bar-height);
+        }
+
+
+        .canvas-container {
+            width: 100%;
+            max-width: 400px;
+            aspect-ratio: 1/1;
+            background: #000;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .canvas-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+
+        .meme-text {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            color: white;
+            font-weight: 900;
+            text-transform: uppercase;
+            padding: 10px;
+            pointer-events: none;
+            -webkit-text-stroke: 1.5px black;
+            paint-order: stroke fill;
+            word-wrap: break-word;
+            line-height: 1.1;
+        }
+
+        .t-top {
+            top: 5px;
+        }
+
+        .t-bottom {
+            bottom: 5px;
+        }
+
+
+        .slider-input {
+            flex: 1;
+            accent-color: #000;
+            cursor: pointer;
+            height: 8px;
+            border-radius: 4px;
+            background: #fff;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        .slider-input::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #000;
+            margin-top: -6px;
+        }
+
+
+        .view-mode-tabs {
+            display: flex;
+            gap: 8px;
+            padding: 0 20px 20px 20px;
+            position: relative;
+            z-index: 1001;
+        }
+
+        .tab-btn {
+            background: #fff;
+            border: none;
+            padding: 0 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            height: 36px;
+        }
+
+        .tab-btn.active {
+            text-decoration: underline;
+        }
+
+
+        .meme-thumb-card {
+            aspect-ratio: 1/1;
+            background: #eee;
+            overflow: hidden;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .meme-thumb-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* ── Cursor Meme Trail ── */
+        .cursor-trail-img {
+            position: fixed;
+            pointer-events: none;
+            border-radius: 0;
+            object-fit: cover;
+            z-index: 0;
+            opacity: 1;
+        }
+
+        /* ── AI Modal ── */
+        .ai-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .ai-card {
+            background: white;
+            color: black;
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .ai-loading-dots::after {
+            content: '...';
+            animation: dots 1.5s infinite;
+        }
+
+        @keyframes dots {
+
+            0%,
+            20% {
+                content: '.';
+            }
+
+            40%,
+            60% {
+                content: '..';
+            }
+
+            80%,
+            100% {
+                content: '...';
+            }
+        }
+
+        .ai-category-pill {
+            background: #000;
+            color: #fff;
+            padding: 8px 20px;
+            border-radius: 50px;
+            display: inline-block;
+            margin: 10px 0;
+            font-size: 1.2rem;
+        }
+
+        .ai-percentage {
+            font-size: 3rem;
+            font-weight: 900;
+        }
+
+        .det-ai-tag {
+            display: inline-block;
+            background: #eee;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+
+    <div id="scene-home" class="scene active">
+        <div class="pane" id="pane-home">
+            <div id="home-trail-container"
+                style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0;">
+            </div>
+            <div class="top-bar-area">
+                <div class="nav-pill-wrapper">
+                    <div class="white-pill" onclick="toggleDrop('drop-home')"><span>home</span><span>↓</span></div>
+                    <div id="drop-home" class="dropdown-menu">
+                        <div class="dropdown-item" onclick="go('scene-home')">home</div>
+                        <div class="dropdown-item" onclick="go('scene-create')">create</div>
+                        <div class="dropdown-item" onclick="go('scene-archive')">archive</div>
+                        <div class="dropdown-item" onclick="go('scene-about')">about</div>
+                    </div>
+                </div>
+            </div>
+            <div class="content-body">
+                <h1 class="big-title">welcome to meme factory.<br>an interactive space to play with memes and map our shared humor.</h1>
+                <h1 class="big-title-ko">밈 팩토리에 오신 것을 환영합니다.<br>밈을 즐기며 우리의 공통된 유머를 지도로 그려보는 인터랙티브 공간입니다.</h1>
+                <button class="btn-large" onclick="go('scene-create')">play</button>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="scene-about" class="scene">
+        <div class="pane" id="pane-about">
+            <div class="top-bar-area">
+                <div class="nav-pill-wrapper">
+                    <div class="white-pill" onclick="toggleDrop('drop-about')"><span>about</span><span>↓</span></div>
+                    <div id="drop-about" class="dropdown-menu">
+                        <div class="dropdown-item" onclick="go('scene-home')">home</div>
+                        <div class="dropdown-item" onclick="go('scene-create')">create</div>
+                        <div class="dropdown-item" onclick="go('scene-archive')">archive</div>
+                    </div>
+                </div>
+                <div class="control-btns"><button class="circle-btn" onclick="historyBack()">←</button></div>
+            </div>
+            <div class="content-body">
+                <div class="sub-text">
+                    Meme Factory explores how our <span class="highlight">thoughts and feelings are connected.</span> We believe that if everyone were
+                    completely different, memes wouldn't be funny. A meme only works because other <span class="highlight">people feel the exact
+                    same way you do.</span> We often think <span class="highlight">we are independent,</span> but we actually share a lot of the <span class="highlight">same patterns</span>
+                    in our humor and daily lives. This project is a space to see how your perspective fits into a larger
+                    human pattern, showing that <span class="highlight">we are all more connected than we realize.</span>
+                </div>
+                <div class="sub-text" style="margin-top: 40px;">
+                    밈 팩토리는 우리의 <span class="highlight">생각이 어떻게 서로 연결되어 있는지</span> 탐구하는 프로젝트입니다. 만약 우리가 모두 완전히 <span class="highlight">다른 생각</span>을 한다면, ‘밈’은 존재할 수 없을 거예요. 밈은 내가 느끼는
+                    감정을 다른 사람도 똑같이 느낄 때 비로소 재미있어지기 때문입니다. <span class="highlight">우리는 스스로 독립적이라고</span> 생각하지만, 사실 일상 속에서 <span class="highlight">비슷한 감정을 공유하며</span> 살아갑니다.
+                    이 프로젝트는 나의 유머와 생각이 다른 사람들과 어떻게 연결되는지 확인해보는 공간입니다. 이를 통해 <span class="highlight">우리가 서로 얼마나 닮아 있는지</span> 즐겁게 확인해보세요.
+                </div>
+                <div style="margin-top: 60px; font-size: 1.3rem; opacity: 0.8;">credits: kamilya & diana, media studio 1
+                    (2026)</div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="scene-create" class="scene">
+        <div class="pane" id="create-left" style="width: 50%;">
+            <div class="top-bar-area">
+                <div class="nav-pill-wrapper">
+                    <div class="white-pill" onclick="toggleDrop('drop-create')"><span>create</span><span>↓</span></div>
+                    <div id="drop-create" class="dropdown-menu">
+                        <div class="dropdown-item" onclick="go('scene-home')">home</div>
+                        <div class="dropdown-item" onclick="go('scene-archive')">archive</div>
+                        <div class="dropdown-item" onclick="go('scene-about')">about</div>
+                    </div>
+                </div>
+            </div>
+            <div class="content-body">
+                <h1 class="big-title">choose a picture and make your own meme.</h1>
+                <h1 class="big-title-ko">이미지를 선택하고 나만의 밈을 만들어보세요.</h1>
+            </div>
+        </div>
+        <div class="pane" id="create-right" style="width: 50%;">
+            <div id="create-template-list" class="create-list"></div>
+
+
+            <div id="create-editor-view" class="hidden">
+                <div class="top-bar-area">
+                    <div class="control-btns"><button class="circle-btn" onclick="hideEditor()">←</button></div>
+                </div>
+                <div class="editor-box">
+                    <div class="canvas-container">
+                        <img id="edit-img" src="">
+                        <div id="p-top" class="meme-text t-top" style="font-size: 2rem;"></div>
+                        <div id="p-bottom" class="meme-text t-bottom" style="font-size: 2rem;"></div>
+                    </div>
+                    <input type="text" id="in-nick" class="input-pill" placeholder="your nickname">
+                    <div class="style-group">
+                        <input type="text" id="in-top" class="input-pill" placeholder="top text"
+                            oninput="sync('p-top', this.value)">
+                        <input type="text" id="in-bottom" class="input-pill" placeholder="bottom text"
+                            oninput="sync('p-bottom', this.value)">
+                        <select id="font-select-input" class="font-select" onchange="updateStyle('font', this.value)">
+                            <optgroup label="english">
+                                <option value="'Arial Narrow'">Arial Narrow</option>
+                                <option value="Impact">Impact</option>
+                                <option value="Anton">Anton</option>
+                            </optgroup>
+                            <optgroup label="korean">
+                                <option value="'Black Han Sans'">Black Han Sans</option>
+                                <option value="'Do Hyeon'">Do Hyeon</option>
+                                <option value="'Nanum Pen Script'">Nanum Pen Script</option>
+                            </optgroup>
+                        </select>
+                        <div class="style-row">
+                            <span>fill</span><input type="color" value="#ffffff"
+                                oninput="updateStyle('color', this.value)" class="color-input-hidden">
+                            <span style="margin-left:20px;">stroke</span><input type="color" value="#000000"
+                                oninput="updateStyle('strokeColor', this.value)" class="color-input-hidden">
+                        </div>
+                        <div class="style-row"><span>size</span><input type="range" min="1" max="4" step="0.1" value="2"
+                                oninput="updateStyle('fontSize', this.value + 'rem')" class="slider-input"></div>
+                        <div class="style-row"><span>stroke</span><input type="range" min="0" max="6" step="0.5"
+                                value="1.5" oninput="updateStyle('strokeWidth', this.value + 'px')"
+                                class="slider-input"></div>
+                    </div>
+                    <button class="btn-large" id="btn-publish" onclick="saveMeme()"
+                        style="width:100%; max-width:400px;">publish meme</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="scene-archive" class="scene">
+        <div class="pane" id="archive-left" style="width: 100%;">
+            <div class="top-bar-area">
+                <div class="nav-pill-wrapper">
+                    <div class="white-pill" onclick="toggleDrop('drop-arch')"><span>archive</span><span>↓</span></div>
+                    <div id="drop-arch" class="dropdown-menu">
+                        <div class="dropdown-item" onclick="go('scene-home')">home</div>
+                        <div class="dropdown-item" onclick="go('scene-create')">create</div>
+                        <div class="dropdown-item" onclick="go('scene-about')">about</div>
+                    </div>
+                </div>
+                <div class="control-btns"><button class="circle-btn" onclick="historyBack()">←</button></div>
+            </div>
+            <div class="content-body">
+                <!-- 한/영 간격 확보를 위해 margin-bottom을 30px로 상향 조정 -->
+                <h1 class="big-title" style="font-size: 2.2rem; margin-bottom: 30px;">you might feel like your humor is
+                    one-of-a-kind, but our data shows that great minds really do think alike. we are all more
+                    connected—and perhaps less unique—than we imagine. explore the patterns and see where you fit in.
+                </h1>
+                <h1 class="big-title-ko" style="font-size: 1.8rem;">사실 우리의 생각은 놀라울 정도로 닮아 있습니다. 우리는 생각보다 서로 덜 특별하고, 더 많이
+                    연결되어 있습니다. 당신의 생각이 어떤 집단적 패턴 속에 있는지 직접 확인해 보세요.</h1>
+            </div>
+            <div class="view-mode-tabs"><button class="tab-btn active" id="tab-icons"
+                    onclick="setMode('icons')">memes</button><button class="tab-btn" id="tab-nicks"
+                    onclick="setMode('nicks')">nicknames</button></div>
+            <div id="archive-list" class="archive-grid grid-cols-full"></div>
+        </div>
+        <div class="pane hidden" id="archive-right" style="width: 0%;">
+            <div class="top-bar-area">
+                <div class="control-btns"><button class="circle-btn" onclick="closeDetail()">×</button></div>
+            </div>
+            <div class="editor-box">
+                <div class="canvas-container" style="margin-top: 40px;"><img id="det-img">
+                    <div id="det-top" class="meme-text t-top"></div>
+                    <div id="det-bottom" class="meme-text t-bottom"></div>
+                </div>
+                <div id="det-meta" style="margin-top:20px; font-size:1.2rem; text-align:center;"></div>
+                <div id="det-ai-info" style="text-align:center;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyChZzoxs-mGsb4D3jn4zaEEsyzVl5Bx_w8",
+            authDomain: "kami-and-diana.firebaseapp.com",
+            projectId: "kami-and-diana",
+            storageBucket: "kami-and-diana.firebasestorage.app",
+            messagingSenderId: "1094907925396",
+            appId: "1:1094907925396:web:0771d0a2d9668a6f3df581"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+        const collectionRef = db.collection('memes');
+
+        const GEMINI_API_KEY = "AIzaSyBVT433-V5dQQjds065aoycpJ2bMy-p968";
+
+        const IMAGE_DESCRIPTIONS = {
+            'image 1.jpeg': 'Little My from Moomins looking with an angry, suspicious, and judgmental side-eye face.',
+            'image 2.jpg': 'A puppet monkey looking awkwardly to the side, known as the "Awkward Look Monkey" meme.',
+            'image 3.png': 'Pepe the Frog with a neutral, slightly sad or contemplative expression.',
+            'image 4.jpeg': 'Doraemon with an unnervingly wide grin and muscular, human-like legs (Buff Doraemon).',
+            'image 5.jpeg': 'A Tibetan Fox with a flat, extremely judgmental and unimpressed facial expression.',
+            'image 6.jpg': 'A K-pop idol making a funny, skeptical, and slightly "disgusted" face.',
+            'image 7.png': 'Detective Pikachu with big watery eyes looking extremely worried, sad, or about to cry.',
+            'image 8.png': 'A stone Buddha statue covering its eyes with its hands, suggesting "see no evil" or second-hand embarrassment.',
+            'image 9.jpeg': 'A black cat looking confused with a digital loading icon edited onto its forehead.',
+            'image 10.jpeg': 'A K-pop star (Jungkook) with a shocked, confused, and slightly repulsed facial expression.',
+            'image 11.jpeg': 'A white cat with black spots looking very skeptical, smug, and unimpressed.',
+            'image 12.jpeg': 'A tiny kitten holding a person\'s finger while looking with intense, determined anger.',
+            'image 13.jpeg': 'A motion-blurred hamster with its mouth wide open in a scream of terror or surprise.',
+            'image 14.jpeg': 'A cat being petted on the head, squinting its eyes in extreme satisfaction and bliss.',
+            'image 15.jpeg': 'Mr. Krabs from SpongeBob with giant, sparkling, dilated eyes showing amazement or greed.',
+            'image 16.jpeg': 'Ryan Gosling looking at a screen with multiple transparent "pain" and "distress" faces overlapping him.',
+            'image 17.jpeg': 'Will Smith in a black suit holding the silver memory-erasing "Neuralyzer" device from Men In Black.',
+            'image 18.jpeg': 'A blonde woman yelling and pointing aggressively during an argument (Woman Yelling at a Cat meme).',
+            'image 19.jpeg': 'A bald man with hands on his hips looking intensely disappointed and weary at a sports match.',
+            'image 20.jpeg': 'Gill from Finding Nemo looking with a deep, scarred, and skeptical frown.',
+            'image 21.jpeg': 'Kermit the Frog curled up in a ball on a bed looking depressed and existential.',
+            'image 22.jpeg': 'A puppet monkey looking awkwardly to the side (Awkward Look Monkey).',
+            'image 23.jpeg': 'Mike Wazowski with Sulley\'s face and two eyes instead of one, looking blankly at the camera.',
+            'image 24.jpeg': 'A confused woman with complex mathematical equations and geometric shapes floating in front of her.',
+            'image 25.jpeg': 'A glowing, overexposed white cat looking straight into the camera with large dark eyes.',
+            'image 26.jpeg': 'Leonardo DiCaprio as Calvin Candie laughing heartily while holding a drink (Django Unchained).',
+            'image 27.jpeg': 'A black cat with a digital loading icon on its forehead (confused/loading).'
+        };
+
+
+        const templates = ['image 1.jpeg', 'image 2.jpg', 'image 3.png', 'image 4.jpeg', 'image 5.jpeg', 'image 6.jpg', 'image 7.png', 'image 8.png', 'image 9.jpeg', 'image 10.jpeg', 'image 11.jpeg', 'image 12.jpeg', 'image 13.jpeg', 'image 14.jpeg', 'image 15.jpeg', 'image 16.jpeg', 'image 17.jpeg', 'image 18.jpeg', 'image 19.jpeg', 'image 20.jpeg', 'image 21.jpeg', 'image 22.jpeg', 'image 23.jpeg', 'image 24.jpeg', 'image 25.jpeg', 'image 26.jpeg', 'image 27.jpeg'];
+        const magicPalette = ['#D141C8', '#41D1A5', '#D17C41', '#416ED1', '#D1C841', '#A541D1', '#7CD141', '#E5D3B3', '#FF4B2B', '#FFD700', '#1E90FF', '#32CD32'];
+
+
+
+        let currentMode = 'icons'; let currentMemes = []; let activeTemplate = ''; let sceneHistory = ['scene-home'];
+        let currentStyles = { color: '#ffffff', font: "'Arial Narrow'", strokeWidth: '1.5px', strokeColor: '#000000', fontSize: '2rem' };
+
+
+        function renderTemplates() {
+            const list = document.getElementById('create-template-list');
+            if (!list) return;
+            list.innerHTML = templates.map(t => `<div class="create-template-card" onclick="showEditor('${t}')"><img src="${t}" onerror="this.src='https://via.placeholder.com/600?text=${t}'"></div>`).join('');
+        }
+
+
+        async function init() {
+            renderTemplates();
+            colorPanes('pane-home');
+            try {
+                await auth.signInAnonymously();
+                loadData();
+            } catch (e) { console.error(e); }
+        }
+
+
+        function loadData() {
+            collectionRef.onSnapshot(snap => {
+                currentMemes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                currentMemes.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+                renderArchive();
+            }, err => console.error(err));
+        }
+
+
+        function colorPanes(p1, p2 = null) {
+            const c1 = magicPalette[Math.floor(Math.random() * magicPalette.length)];
+            const el1 = document.getElementById(p1);
+            if (el1) el1.style.backgroundColor = c1;
+            const el2 = document.getElementById(p2);
+            if (el2) el2.style.backgroundColor = magicPalette.filter(c => c !== c1)[Math.floor(Math.random() * (magicPalette.length - 1))];
+        }
+
+
+        function go(id) {
+            if (sceneHistory[sceneHistory.length - 1] !== id) sceneHistory.push(id);
+            document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            if (id === 'scene-home') colorPanes('pane-home');
+            if (id === 'scene-create') { hideEditor(); colorPanes('create-left', 'create-right'); }
+            if (id === 'scene-archive') { closeDetail(); colorPanes('archive-left'); renderArchive(); }
+            if (id === 'scene-about') colorPanes('pane-about');
+        }
+
+
+        function historyBack() { if (sceneHistory.length > 1) { sceneHistory.pop(); go(sceneHistory[sceneHistory.length - 1]); } }
+        function toggleDrop(id) { document.querySelectorAll('.dropdown-menu').forEach(m => m.id === id ? m.classList.toggle('show') : m.classList.remove('show')); }
+
+
+        function showEditor(t) {
+            activeTemplate = t;
+            document.getElementById('edit-img').src = t;
+            document.getElementById('create-template-list').classList.add('hidden');
+            document.getElementById('create-editor-view').classList.remove('hidden');
+            colorPanes('create-left', 'create-right');
+        }
+
+
+        function hideEditor() {
+            document.getElementById('create-template-list').classList.remove('hidden');
+            document.getElementById('create-editor-view').classList.add('hidden');
+        }
+
+
+        function sync(id, val) { document.getElementById(id).innerText = val; }
+
+
+        function updateStyle(prop, val) {
+            currentStyles[prop] = val;
+            const targets = [document.getElementById('p-top'), document.getElementById('p-bottom')];
+            targets.forEach(t => {
+                if (prop === 'color') t.style.color = val;
+                if (prop === 'font') t.style.fontFamily = val;
+                if (prop === 'fontSize') t.style.fontSize = val;
+                if (prop === 'strokeWidth' || prop === 'strokeColor') t.style.webkitTextStroke = `${currentStyles.strokeWidth} ${currentStyles.strokeColor}`;
+            });
+        }
+
+
+        async function saveMeme() {
+            const btn = document.getElementById('btn-publish');
+            if (btn.disabled) return;
+            btn.disabled = true;
+            btn.innerText = "publishing...";
+
+            const top = document.getElementById('in-top').value;
+            const bottom = document.getElementById('in-bottom').value;
+            const nick = document.getElementById('in-nick').value || 'anon';
+
+            try {
+                if (!auth.currentUser) await auth.signInAnonymously();
+                await collectionRef.add({
+                    template: activeTemplate,
+                    nickname: nick,
+                    topText: top,
+                    bottomText: bottom,
+                    styles: JSON.parse(JSON.stringify(currentStyles)),
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                btn.disabled = false; btn.innerText = "publish meme";
+                go('scene-archive');
+                return;
+            } catch (e) {
+                console.error(e);
+                alert("Failed to publish.");
+                btn.disabled = false; btn.innerText = "publish meme";
+                return;
+            }
+        }
+
+
+
+
+        function setMode(m) { currentMode = m; document.getElementById('tab-icons').classList.toggle('active', m === 'icons'); document.getElementById('tab-nicks').classList.toggle('active', m === 'nicks'); renderArchive(); }
+
+
+        function fixPath(p) { 
+            if (!p) return ''; 
+            let path = p.startsWith('image ') ? p : 'image ' + p;
+            // Common fix for .jpg vs .jpeg mismatches
+            if (path.endsWith('.jpg') && !templates.includes(path)) {
+                let alt = path.replace('.jpg', '.jpeg');
+                if (templates.includes(alt)) return alt;
+            }
+            return path;
+        }
+
+
+        function renderArchive() {
+            const list = document.getElementById('archive-list'); if (!list) return;
+            list.innerHTML = '';
+            if (currentMode === 'nicks') {
+                list.innerHTML = currentMemes.map(m => `<div class="nick-card" onclick='openDetail(${JSON.stringify(m).replace(/'/g, "&apos;")})'>${m.nickname || 'anon'}</div>`).join('');
+            } else {
+                currentMemes.forEach(m => {
+                    const s = m.styles || currentStyles;
+                    const card = document.createElement('div'); card.className = 'meme-thumb-card'; card.onclick = () => openDetail(m);
+                    card.innerHTML = `<img src="${fixPath(m.template)}"><div class="meme-text t-top" style="font-size:0.85rem; font-family:${s.font}; color:${s.color}; -webkit-text-stroke:0.35px ${s.strokeColor}">${m.topText || ''}</div><div class="meme-text t-bottom" style="font-size:0.85rem; font-family:${s.font}; color:${s.color}; -webkit-text-stroke:0.35px ${s.strokeColor}">${m.bottomText || ''}</div>`;
+                    list.appendChild(card);
+                });
+            }
+        }
+
+
+        function openDetail(m) {
+            document.getElementById('archive-left').style.width = '50%';
+            document.getElementById('archive-right').classList.remove('hidden');
+            document.getElementById('archive-right').style.width = '50%';
+            document.getElementById('archive-list').className = 'archive-grid grid-cols-half';
+            
+            document.getElementById('det-img').src = fixPath(m.template);
+            document.getElementById('det-top').innerText = m.topText || '';
+            document.getElementById('det-bottom').innerText = m.bottomText || '';
+            
+            // Format Timestamp
+            let timeStr = "";
+            if (m.timestamp) {
+                const date = m.timestamp.toDate ? m.timestamp.toDate() : new Date(m.timestamp);
+                timeStr = ` | ${date.toLocaleDateString()} ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
+            }
+            document.getElementById('det-meta').innerText = `by ${m.nickname || 'anon'}${timeStr}`;
+
+            // Hide AI info box completely
+            document.getElementById('det-ai-info').innerHTML = '';
+
+            const s = m.styles || currentStyles;
+            [document.getElementById('det-top'), document.getElementById('det-bottom')].forEach(t => {
+                t.style.color = s.color; t.style.fontFamily = s.font; t.style.fontSize = s.fontSize; t.style.webkitTextStroke = `${s.strokeWidth} ${s.strokeColor}`;
+            });
+            colorPanes('archive-left', 'archive-right');
+        }
+
+
+        function closeDetail() {
+            document.getElementById('archive-left').style.width = '100%';
+            document.getElementById('archive-right').classList.add('hidden');
+            document.getElementById('archive-list').className = 'archive-grid grid-cols-full';
+            colorPanes('archive-left');
+        }
+
+
+        window.onclick = (e) => { if (!e.target.closest('.nav-pill-wrapper')) document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show')); };
+        window.onload = init;
+
+
+        /* ── Cursor Meme Trail Logic ── */
+        (function () {
+            // Ordered sequence – cycles through all 27 images in a specific pattern
+            const trailOrder = [
+                'image 1.jpeg', 'image 5.jpeg', 'image 3.png',
+                'image 7.png', 'image 2.jpg', 'image 10.jpeg',
+                'image 16.jpeg', 'image 13.jpeg', 'image 4.jpeg',
+                'image 6.jpg', 'image 8.png', 'image 11.jpeg',
+                'image 17.jpeg', 'image 14.jpeg', 'image 20.jpeg',
+                'image 9.jpeg', 'image 19.jpeg', 'image 25.jpeg',
+                'image 15.jpeg', 'image 22.jpeg', 'image 24.jpeg',
+                'image 12.jpeg', 'image 21.jpeg', 'image 23.jpeg',
+                'image 18.jpeg', 'image 26.jpeg', 'image 27.jpeg'
+            ];
+
+            // Size alternation: small, medium, small-wide, etc.
+            const sizes = [
+                { w: 64, h: 64 },
+                { w: 80, h: 80 },
+                { w: 72, h: 56 },
+                { w: 56, h: 72 },
+                { w: 68, h: 68 },
+            ];
+
+            let trailIndex = 0;
+            let sizeIndex = 0;
+            let lastX = -999, lastY = -999;
+            const MIN_DIST = 48; // px between consecutive images
+
+            function isHomeActive() {
+                const scene = document.getElementById('scene-home');
+                return scene && scene.classList.contains('active');
+            }
+
+            function spawnTrailImage(x, y) {
+                const src = trailOrder[trailIndex % trailOrder.length];
+                const size = sizes[sizeIndex % sizes.length];
+                trailIndex++;
+                sizeIndex++;
+
+                const img = document.createElement('img');
+                img.className = 'cursor-trail-img';
+                img.src = src;
+                img.width = size.w;
+                img.height = size.h;
+                // Centre the image on the cursor
+                img.style.left = (x - size.w / 2) + 'px';
+                img.style.top = (y - size.h / 2) + 'px';
+
+                const container = document.getElementById('home-trail-container');
+                if (container) container.appendChild(img);
+            }
+
+            function clearTrail() {
+                document.querySelectorAll('.cursor-trail-img').forEach(el => el.remove());
+            }
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isHomeActive()) return;
+
+                const dx = e.clientX - lastX;
+                const dy = e.clientY - lastY;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (dist >= MIN_DIST) {
+                    lastX = e.clientX;
+                    lastY = e.clientY;
+                    spawnTrailImage(e.clientX, e.clientY);
+                }
+            });
+
+            // Clear trail whenever we leave the home scene
+            const origGo = window.go || (() => { });
+            // Patch go() to clear trail on scene switch away from home
+            const _goOrig = go;
+            window.go = function (id) {
+                if (id !== 'scene-home') clearTrail();
+                _goOrig(id);
+            };
+        })();
+    </script>
+</body>
+
+</html>
