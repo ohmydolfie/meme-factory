@@ -73,9 +73,11 @@
             align-items: center;
             gap: 8px;
             padding: 12px 15px;
+            padding-top: calc(12px + env(safe-area-inset-top)); /* Safari Mobile Fix */
             position: sticky;
             top: 0;
-            z-index: 2000;
+            z-index: 4000; /* Higher z-index */
+            background: transparent;
         }
 
         .nav-pill-wrapper {
@@ -100,14 +102,14 @@
         .dropdown-menu {
             display: none;
             position: absolute;
-            top: 50px;
+            top: 52px;
             left: 0;
             width: 100%;
             background: var(--white);
             border-radius: 15px;
             overflow: hidden;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-            z-index: 3000;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            z-index: 5000;
         }
 
         .dropdown-menu.show {
@@ -328,13 +330,30 @@
         }
 
         .font-select {
-            background: white;
-            border: none;
-            border-radius: 50px;
-            padding: 0 20px;
-            font-size: var(--ui-font-size);
             width: 100%;
-            height: var(--bar-height);
+            height: 48px;
+            border-radius: 50px;
+            border: none;
+            padding: 0 20px;
+            background: #fff;
+            font-size: 1rem;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .select-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .select-arrow {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            font-size: 1.1rem;
+            color: var(--black);
         }
 
 
@@ -356,17 +375,16 @@
 
         .meme-text {
             position: absolute;
-            width: 100%;
+            width: 90%;
+            left: 5%;
             text-align: center;
-            color: white;
-            font-weight: 900;
+            color: #D141C8; /* Dark Pink Default */
+            font-family: Impact, sans-serif;
             text-transform: uppercase;
-            padding: 10px;
-            pointer-events: none;
-            -webkit-text-stroke: 1.5px black;
-            paint-order: stroke fill;
-            word-wrap: break-word;
             line-height: 1.1;
+            -webkit-text-stroke: 1.5px black;
+            word-wrap: break-word;
+            pointer-events: none;
         }
 
         .t-top {
@@ -628,20 +646,23 @@
                             oninput="sync('p-top', this.value)">
                         <input type="text" id="in-bottom" class="input-pill" placeholder="bottom text"
                             oninput="sync('p-bottom', this.value)">
-                        <select id="font-select-input" class="font-select" onchange="updateStyle('font', this.value)">
-                            <optgroup label="english">
-                                <option value="'Arial Narrow'">Arial Narrow</option>
-                                <option value="Impact">Impact</option>
-                                <option value="Anton">Anton</option>
-                            </optgroup>
-                            <optgroup label="korean">
-                                <option value="'Black Han Sans'">Black Han Sans</option>
-                                <option value="'Do Hyeon'">Do Hyeon</option>
-                                <option value="'Nanum Pen Script'">Nanum Pen Script</option>
-                            </optgroup>
-                        </select>
+                        <div class="select-wrapper">
+                            <select id="font-select-input" class="font-select" onchange="updateStyle('font', this.value)">
+                                <optgroup label="english">
+                                    <option value="'Arial Narrow'">Arial Narrow</option>
+                                    <option value="Impact">Impact</option>
+                                    <option value="Anton">Anton</option>
+                                </optgroup>
+                                <optgroup label="korean">
+                                    <option value="'Black Han Sans'">Black Han Sans</option>
+                                    <option value="'Do Hyeon'">Do Hyeon</option>
+                                    <option value="'Nanum Pen Script'">Nanum Pen Script</option>
+                                </optgroup>
+                            </select>
+                            <div class="select-arrow">↓</div>
+                        </div>
                         <div class="style-row">
-                            <span>fill</span><input type="color" value="#ffffff"
+                            <span>fill</span><input type="color" value="#D141C8"
                                 oninput="updateStyle('color', this.value)" class="color-input-hidden">
                             <span style="margin-left:20px;">stroke</span><input type="color" value="#000000"
                                 oninput="updateStyle('strokeColor', this.value)" class="color-input-hidden">
@@ -692,11 +713,15 @@
                 <div class="control-btns"><button class="circle-btn" onclick="closeDetail()">×</button></div>
             </div>
             <div class="editor-box">
-                <div class="canvas-container" style="margin-top: 40px;"><img id="det-img">
+                <div id="det-meta" style="margin-bottom:20px; font-size:1.2rem; text-align:center; opacity:0.8;"></div>
+                <div class="canvas-container" style="margin-top:0;"><img id="det-img">
                     <div id="det-top" class="meme-text t-top"></div>
                     <div id="det-bottom" class="meme-text t-bottom"></div>
                 </div>
-                <div id="det-meta" style="margin-top:20px; font-size:1.2rem; text-align:center;"></div>
+                <div style="display:flex; justify-content:space-between; margin-top:20px; gap:10px;">
+                    <button class="input-pill" style="background:#000; color:#fff; flex:1; height:40px; font-size:0.9rem;" id="btn-so-true">so true <span id="count-true">0</span></button>
+                    <button class="input-pill" style="background:#eee; color:#000; flex:1; height:40px; font-size:0.9rem;" id="btn-just-passing">just passing by <span id="count-passing">0</span></button>
+                </div>
                 <div id="det-ai-info" style="text-align:center;"></div>
             </div>
         </div>
@@ -715,8 +740,6 @@
         const db = firebase.firestore();
         const auth = firebase.auth();
         const collectionRef = db.collection('memes');
-
-        const GEMINI_API_KEY = "AIzaSyBVT433-V5dQQjds065aoycpJ2bMy-p968";
 
         const IMAGE_DESCRIPTIONS = {
             'image 1.jpeg': 'Little My from Moomins looking with an angry, suspicious, and judgmental side-eye face.',
@@ -755,7 +778,7 @@
 
 
         let currentMode = 'icons'; let currentMemes = []; let activeTemplate = ''; let sceneHistory = ['scene-home'];
-        let currentStyles = { color: '#ffffff', font: "'Arial Narrow'", strokeWidth: '1.5px', strokeColor: '#000000', fontSize: '2rem' };
+        let currentStyles = { color: '#D141C8', font: "'Arial Narrow'", strokeWidth: '1.5px', strokeColor: '#000000', fontSize: '2rem' };
 
 
         function renderTemplates() {
@@ -814,6 +837,9 @@
             document.getElementById('create-template-list').classList.add('hidden');
             document.getElementById('create-editor-view').classList.remove('hidden');
             colorPanes('create-left', 'create-right');
+            
+            // Apply current styles immediately
+            Object.keys(currentStyles).forEach(prop => updateStyle(prop, currentStyles[prop]));
         }
 
 
@@ -839,14 +865,41 @@
 
 
         async function saveMeme() {
+            const inNick = document.getElementById('in-nick');
+            const inTop = document.getElementById('in-top');
+            const inBottom = document.getElementById('in-bottom');
             const btn = document.getElementById('btn-publish');
+
+            // Reset styles
+            [inNick, inTop, inBottom].forEach(el => {
+                el.style.border = "none";
+                el.placeholder = el.id === 'in-nick' ? "your nickname" : (el.id === 'in-top' ? "top text" : "bottom text");
+            });
+
+            const nick = inNick.value.trim();
+            const top = inTop.value.trim();
+            const bottom = inBottom.value.trim();
+
+            let hasError = false;
+
+            if (!nick) {
+                inNick.style.border = "2px solid #ff4444";
+                inNick.placeholder = "nickname required!";
+                hasError = true;
+            }
+            if (!top && !bottom) {
+                inTop.style.border = "2px solid #ff4444";
+                inBottom.style.border = "2px solid #ff4444";
+                inTop.placeholder = "text required!";
+                inBottom.placeholder = "text required!";
+                hasError = true;
+            }
+
+            if (hasError) return;
+
             if (btn.disabled) return;
             btn.disabled = true;
             btn.innerText = "publishing...";
-
-            const top = document.getElementById('in-top').value;
-            const bottom = document.getElementById('in-bottom').value;
-            const nick = document.getElementById('in-nick').value || 'anon';
 
             try {
                 if (!auth.currentUser) await auth.signInAnonymously();
@@ -912,6 +965,14 @@
             document.getElementById('det-img').src = fixPath(m.template);
             document.getElementById('det-top').innerText = m.topText || '';
             document.getElementById('det-bottom').innerText = m.bottomText || '';
+
+            // Counters
+            document.getElementById('count-true').innerText = m.likesTrue || 0;
+            document.getElementById('count-passing').innerText = m.likesPassing || 0;
+
+            // Voting handlers
+            document.getElementById('btn-so-true').onclick = () => voteMeme(m.id, 'likesTrue');
+            document.getElementById('btn-just-passing').onclick = () => voteMeme(m.id, 'likesPassing');
             
             // Format Timestamp
             let timeStr = "";
@@ -929,6 +990,19 @@
                 t.style.color = s.color; t.style.fontFamily = s.font; t.style.fontSize = s.fontSize; t.style.webkitTextStroke = `${s.strokeWidth} ${s.strokeColor}`;
             });
             colorPanes('archive-left', 'archive-right');
+        }
+
+        async function voteMeme(docId, type) {
+            try {
+                await collectionRef.doc(docId).update({
+                    [type]: firebase.firestore.FieldValue.increment(1)
+                });
+                const spanId = type === 'likesTrue' ? 'count-true' : 'count-passing';
+                const span = document.getElementById(spanId);
+                if(span) span.innerText = parseInt(span.innerText) + 1;
+            } catch (e) {
+                console.error("Vote failed:", e);
+            }
         }
 
 
