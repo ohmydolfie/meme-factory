@@ -214,6 +214,9 @@
         @media (max-width: 768px) {
             .scene {
                 flex-direction: column !important;
+                overflow-y: auto !important;
+                height: 100vh !important;
+                -webkit-overflow-scrolling: touch; /* Smooth scrolling for Safari */
             }
             /* Archive Detail on Top for Mobile */
             #scene-archive.detail-active {
@@ -721,8 +724,8 @@
                     <div id="det-bottom" class="meme-text t-bottom"></div>
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-top:20px; gap:20px; width:100%; max-width:320px;">
-                    <button class="input-pill" style="background:#fff; color:#000; flex:1; height:36px; font-size:0.8rem; white-space:nowrap; padding:0 12px; cursor:pointer; border-radius:20px;" id="btn-so-true">so true: <span id="count-true">0</span></button>
-                    <button class="input-pill" style="background:#fff; color:#000; flex:1; height:36px; font-size:0.8rem; white-space:nowrap; padding:0 12px; cursor:pointer; border-radius:20px;" id="btn-just-passing">passing by: <span id="count-passing">0</span></button>
+                    <button id="btn-so-true" style="background:#fff !important; color:#000 !important; border:none; flex:1; height:36px !important; font-size:0.8rem; white-space:nowrap; padding:0 12px; cursor:pointer; border-radius:20px;">so true: <span id="count-true">0</span></button>
+                    <button id="btn-just-passing" style="background:#fff !important; color:#000 !important; border:none; flex:1; height:36px !important; font-size:0.8rem; white-space:nowrap; padding:0 12px; cursor:pointer; border-radius:20px;">passing by: <span id="count-passing">0</span></button>
                 </div>
                 <div id="det-ai-info" style="text-align:center;"></div>
             </div>
