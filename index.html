@@ -218,9 +218,31 @@
                 height: 100vh !important;
                 -webkit-overflow-scrolling: touch; /* Smooth scrolling for Safari */
             }
-            /* Archive Detail on Top for Mobile */
-            #scene-archive.detail-active {
-                flex-direction: column-reverse !important;
+            /* Reorder Archive for Mobile: Header -> Detail -> Grid */
+            #scene-archive {
+                display: flex !important;
+                flex-direction: column !important;
+            }
+            #archive-left {
+                display: contents;
+            }
+            #archive-left > .top-bar-area { order: 1; }
+            #archive-left > .content-body { order: 2; }
+            #archive-right { order: 3; width: 100% !important; display: block !important; }
+            #archive-right.hidden { display: none !important; }
+            #archive-left > .view-mode-tabs { order: 4; }
+            #archive-left > .archive-grid { order: 5; }
+            #archive-right .top-bar-area {
+                position: absolute !important;
+                top: 15px;
+                right: 15px;
+                width: auto;
+                z-index: 10000;
+                padding: 0;
+                background: transparent !important;
+            }
+            #archive-right .canvas-container {
+                background: transparent !important;
             }
             .pane {
                 width: 100% !important;
@@ -815,7 +837,13 @@
         function colorPanes(p1, p2 = null) {
             const c1 = magicPalette[Math.floor(Math.random() * magicPalette.length)];
             const el1 = document.getElementById(p1);
-            if (el1) el1.style.backgroundColor = c1;
+            if (el1) {
+                el1.style.backgroundColor = c1;
+                if (p1 === "archive-left" && window.innerWidth <= 768) {
+                    const sc = document.getElementById("scene-archive");
+                    if (sc) sc.style.backgroundColor = c1;
+                }
+            }
             const el2 = document.getElementById(p2);
             if (el2) el2.style.backgroundColor = magicPalette.filter(c => c !== c1)[Math.floor(Math.random() * (magicPalette.length - 1))];
         }
@@ -974,9 +1002,14 @@
             // Add class for mobile reordering
             document.getElementById('scene-archive').classList.add('detail-active');
             
-            // Scroll to top on mobile so they see the picture immediately
+            // Scroll to the detail view on mobile
             if (window.innerWidth <= 768) {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                const detail = document.getElementById('archive-right');
+                if (detail) {
+                    setTimeout(() => {
+                        window.scrollTo({ top: detail.offsetTop - 60, behavior: 'smooth' });
+                    }, 100);
+                }
             }
 
             // Counters
@@ -1002,7 +1035,13 @@
             [document.getElementById('det-top'), document.getElementById('det-bottom')].forEach(t => {
                 t.style.color = s.color; t.style.fontFamily = s.font; t.style.fontSize = s.fontSize; t.style.webkitTextStroke = `${s.strokeWidth} ${s.strokeColor}`;
             });
-            colorPanes('archive-left', 'archive-right');
+            if (window.innerWidth <= 768) {
+                const al = document.getElementById("archive-left");
+                const ar = document.getElementById("archive-right");
+                if (al && ar) ar.style.backgroundColor = al.style.backgroundColor;
+            } else {
+                colorPanes("archive-left", "archive-right");
+            }
         }
 
         async function voteMeme(docId, type) {
