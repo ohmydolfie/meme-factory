@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
@@ -9,7 +9,12 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <!-- html2canvas for meme download -->
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbit&display=swap" rel="stylesheet">
     <link
         href="https://fonts.googleapis.com/css2?family=Anton&family=Bangers&family=Black+Han+Sans&family=Do+Hyeon&family=Gamja+Flower&family=Gothic+A1:wght@900&family=Hi+Melody&family=Jua&family=Lobster&family=Nanum+Brush+Script&family=Nanum+Pen+Script&family=Noto+Sans+KR:wght@900&family=Oswald:wght@700&family=Pacifico&family=Permanent+Marker&family=Press+Start+2P&family=Righteous&family=Roboto+Condensed:wght@700&family=Song+Myung&family=Yeon+Sung&family=Nanum+Gothic:wght@800&family=Nanum+Myeongjo:wght@800&family=Poor+Story&family=Single+Day&family=Sunflower:wght@700&family=Gaegu&display=swap"
         rel="stylesheet">
@@ -19,16 +24,20 @@
             --black: #000000;
             --bar-height: 46px;
             --ui-font-size: 1.1rem;
+            --meme-yellow: #FFF566;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: "Arial Narrow", Arial, sans-serif;
+            font-family: "Orbit", sans-serif;
             -webkit-tap-highlight-color: transparent;
             outline: none !important;
         }
+
+        html[lang="en"] .lang-ko { display: none !important; }
+        html[lang="ko"] .lang-en { display: none !important; }
 
         body,
         html {
@@ -155,16 +164,16 @@
         }
 
         .big-title {
-            font-size: 3.2rem;
-            line-height: 1.1;
+            font-size: clamp(2.2rem, 5.5vw, 7rem);
+            line-height: 1.0;
             letter-spacing: -1.5px;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             font-weight: normal;
         }
 
         .big-title-ko {
-            font-size: 2.6rem;
-            line-height: 1.2;
+            font-size: clamp(1.9rem, 4.5vw, 6rem);
+            line-height: 1.1;
             letter-spacing: -1px;
             margin-bottom: 30px;
             font-weight: normal;
@@ -276,7 +285,12 @@
             height: var(--bar-height);
             font-weight: normal;
             position: relative;
-            z-index: 6;
+            z-index: 10;
+            transition: filter 0.1s ease;
+        }
+
+        .btn-large:active {
+            filter: invert(1);
         }
 
 
@@ -315,7 +329,24 @@
             flex-direction: column;
             gap: 16px;
             padding: 0 20px 60px 20px;
+            padding-top: 12px;
+            padding-top: calc(12px + env(safe-area-inset-top));
             align-items: center;
+        }
+
+        .editor-fields {
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .text-bars-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
         }
 
         .input-pill {
@@ -399,11 +430,11 @@
             width: 90%;
             left: 5%;
             text-align: center;
-            color: #D141C8; /* Dark Pink Default */
+            color: var(--meme-yellow);
             font-family: Impact, sans-serif;
             text-transform: uppercase;
             line-height: 1.1;
-            -webkit-text-stroke: 1.5px black;
+            -webkit-text-stroke: 0 transparent;
             word-wrap: break-word;
             pointer-events: none;
         }
@@ -447,16 +478,21 @@
         }
 
         .tab-btn {
-            background: #fff;
+            background: var(--white);
             border: none;
-            padding: 0 20px;
-            border-radius: 20px;
+            border-radius: 50px;
+            padding: 0 18px;
             cursor: pointer;
-            height: 36px;
+            height: var(--bar-height);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: var(--ui-font-size);
         }
 
         .tab-btn.active {
-            text-decoration: underline;
+            background: #000;
+            color: #fff;
         }
 
 
@@ -478,6 +514,106 @@
 
         .hidden {
             display: none !important;
+        }
+
+        .draggable-text {
+            position: absolute;
+            cursor: move;
+            user-select: none;
+            pointer-events: auto;
+            text-transform: uppercase;
+            line-height: 1.1;
+            word-wrap: break-word;
+            text-align: center;
+            max-width: 95%;
+            transform: translate(-50%, -50%);
+            white-space: nowrap;
+            font-family: Impact, sans-serif;
+            z-index: 1000;
+            -webkit-text-stroke: 0 transparent;
+        }
+
+        .text-bar-row {
+            width: 100%;
+        }
+
+        .text-bar-pill {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            background: #fff;
+            border-radius: 50px;
+            height: var(--bar-height);
+            padding: 0 14px 0 20px;
+            gap: 6px;
+        }
+
+        .text-bar-pill.input-error .text-bar-input::placeholder {
+            color: #ff4444;
+            opacity: 1;
+        }
+
+        .text-bar-input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-size: var(--ui-font-size);
+            height: 100%;
+            min-width: 0;
+            padding: 0;
+            caret-color: transparent;
+        }
+
+        .text-bar-input:focus {
+            caret-color: var(--black);
+        }
+
+        .text-bar-input::placeholder {
+            color: #999;
+            opacity: 1;
+        }
+
+        .text-bar-x {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            line-height: 1;
+            color: var(--black);
+            padding: 0 6px 0 2px;
+            flex-shrink: 0;
+        }
+
+        .text-bar-x:hover {
+            opacity: 0.5;
+        }
+
+        .add-text-link {
+            width: 100%;
+            font-size: 0.95rem;
+            color: #999;
+            cursor: pointer;
+            margin-top: 2px;
+            padding-left: 20px;
+            background: none;
+            border: none;
+            text-align: left;
+        }
+
+        .add-text-link:hover {
+            text-decoration: underline;
+        }
+
+        .archive-message {
+            grid-column: 1 / -1;
+            padding: 20px;
+            font-size: 1rem;
+            line-height: 1.5;
+            opacity: 0.85;
+        }
+
+        .archive-message.error {
+            color: #ff4444;
         }
 
         /* ── Cursor Meme Trail ── */
@@ -573,13 +709,15 @@
 
 
     <div id="scene-home" class="scene active">
-        <div class="pane" id="pane-home">
+        <div class="pane" id="pane-home" style="position: relative; overflow: hidden;">
+            <!-- Cursor trail: z-index 2 — above text (1), below play button (10) -->
             <div id="home-trail-container"
-                style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0;">
+                style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2;">
             </div>
-            <div class="top-bar-area">
+            <!-- Nav bar: z-index 20 so it's always on top -->
+            <div class="top-bar-area" style="position: relative; z-index: 20;">
                 <div class="nav-pill-wrapper">
-                    <div class="white-pill" onclick="toggleDrop('drop-home')"><span>home</span><span>↓</span></div>
+                    <div class="white-pill" onclick="toggleDrop('drop-home')"><span>home</span><div style="display:flex; align-items:center;"><span onclick="toggleLang(event)" style="margin-right:8px; cursor:pointer;"><span class="lang-en" style="opacity:0.5;">kr</span><span class="lang-ko" style="opacity:0.5;">en</span></span><span>↓</span></div></div>
                     <div id="drop-home" class="dropdown-menu">
                         <div class="dropdown-item" onclick="go('scene-home')">home</div>
                         <div class="dropdown-item" onclick="go('scene-create')">create</div>
@@ -588,10 +726,12 @@
                     </div>
                 </div>
             </div>
-            <div class="content-body">
-                <h1 class="big-title">welcome to meme factory.<br>an interactive space to play with memes and map our shared humor.</h1>
-                <h1 class="big-title-ko">밈 팩토리에 오신 것을 환영합니다.<br>밈을 즐기며 우리의 공통된 유머를 지도로 그려보는 인터랙티브 공간입니다.</h1>
-                <button class="btn-large" onclick="go('scene-create')">play</button>
+            <!-- Text: no z-index so play button's z-index:10 beats trail in root stacking context -->
+            <div class="content-body" style="position: relative;">
+                <h1 class="big-title lang-en">welcome to meme factory.<br>an interactive space to play with memes and map our shared humor.</h1>
+                <h1 class="big-title-ko lang-ko">밈 팩토리에 오신 것을 환영합니다.<br>밈을 즐기며 우리의 공통된 유머를 지도로 그려보는 인터랙티브 공간입니다.</h1>
+                <!-- Play button: z-index 10 — above cursor trail -->
+                <button class="btn-large" onclick="go('scene-create')" style="position: relative; z-index: 10;"><span class="lang-en">play</span><span class="lang-ko">플레이</span></button>
             </div>
         </div>
     </div>
@@ -611,20 +751,20 @@
                 <div class="control-btns"><button class="circle-btn" onclick="historyBack()">←</button></div>
             </div>
             <div class="content-body">
-                <div class="sub-text">
+                <div class="sub-text lang-en">
                     Meme Factory explores how our <span class="highlight">thoughts and feelings are connected.</span> We believe that if everyone were
                     completely different, memes wouldn't be funny. A meme only works because other <span class="highlight">people feel the exact
                     same way you do.</span> We often think <span class="highlight">we are independent,</span> but we actually share a lot of the <span class="highlight">same patterns</span>
                     in our humor and daily lives. This project is a space to see how your perspective fits into a larger
                     human pattern, showing that <span class="highlight">we are all more connected than we realize.</span>
                 </div>
-                <div class="sub-text" style="margin-top: 40px;">
+                <div class="sub-text lang-ko">
                     밈 팩토리는 우리의 <span class="highlight">생각이 어떻게 서로 연결되어 있는지</span> 탐구하는 프로젝트입니다. 만약 우리가 모두 완전히 <span class="highlight">다른 생각</span>을 한다면, ‘밈’은 존재할 수 없을 거예요. 밈은 내가 느끼는
                     감정을 다른 사람도 똑같이 느낄 때 비로소 재미있어지기 때문입니다. <span class="highlight">우리는 스스로 독립적이라고</span> 생각하지만, 사실 일상 속에서 <span class="highlight">비슷한 감정을 공유하며</span> 살아갑니다.
                     이 프로젝트는 나의 유머와 생각이 다른 사람들과 어떻게 연결되는지 확인해보는 공간입니다. 이를 통해 <span class="highlight">우리가 서로 얼마나 닮아 있는지</span> 즐겁게 확인해보세요.
                 </div>
-                <div style="margin-top: 60px; font-size: 1.3rem; opacity: 0.8;">credits: kamilya & diana, media studio 1
-                    (2026)</div>
+                <div class="lang-en" style="margin-top: 60px; font-size: 1.3rem; opacity: 0.8;">credits: kamilya & diana, media studio 1 (2026)</div>
+                <div class="lang-ko" style="margin-top: 60px; font-size: 1.3rem; opacity: 0.8;">크레딧: 카밀랴 & 다이아나, 미디어 스튜디오 1 (2026)</div>
             </div>
         </div>
     </div>
@@ -642,31 +782,50 @@
                     </div>
                 </div>
             </div>
-            <div class="content-body">
-                <h1 class="big-title">choose a picture and make your own meme.</h1>
-                <h1 class="big-title-ko">이미지를 선택하고 나만의 밈을 만들어보세요.</h1>
+            <div class="content-body" id="create-left-default">
+                <h1 class="big-title lang-en">choose a picture and make your own meme.</h1>
+                <h1 class="big-title-ko lang-ko">이미지를 선택하고 나만의 밈을 만들어보세요.</h1>
+            </div>
+            <div class="content-body hidden" id="create-left-instructions">
+                <h1 class="big-title lang-en" style="font-size: 1.8rem; line-height: 1.5;">
+                    1. make a funny nickname<br>
+                    2. add text and move it around<br>
+                    3. play with styles<br>
+                    4. all done!
+                </h1>
+                <h1 class="big-title-ko lang-ko" style="font-size: 1.8rem; line-height: 1.5;">
+                    1. 웃긴 별명 만들기<br>
+                    2. 텍스트 추가하고 여기저기 움직이기<br>
+                    3. 스타일 가지고 놀기<br>
+                    4. 완료!
+                </h1>
             </div>
         </div>
         <div class="pane" id="create-right" style="width: 50%;">
+            <div id="create-view-mode-tabs" class="top-bar-area">
+                <div class="view-mode-tabs" style="padding: 0; width: 100%;">
+                    <button class="tab-btn active" id="tab-create-images" onclick="setCreateType('images')"><span class="lang-en">images</span><span class="lang-ko">이미지</span></button>
+                    <button class="tab-btn" id="tab-create-gifs" onclick="setCreateType('gifs')"><span class="lang-en">gifs</span><span class="lang-ko">GIF</span></button>
+                </div>
+            </div>
             <div id="create-template-list" class="create-list"></div>
-
-
             <div id="create-editor-view" class="hidden">
-                <div class="top-bar-area">
+                <div class="top-bar-area" style="position: absolute; right: 0; top: 0; justify-content: flex-end; width: auto; z-index: 5000;">
                     <div class="control-btns"><button class="circle-btn" onclick="hideEditor()">←</button></div>
                 </div>
                 <div class="editor-box">
-                    <div class="canvas-container">
+                    <div class="canvas-container" id="editor-canvas-container">
                         <img id="edit-img" src="">
-                        <div id="p-top" class="meme-text t-top" style="font-size: 2rem;"></div>
-                        <div id="p-bottom" class="meme-text t-bottom" style="font-size: 2rem;"></div>
                     </div>
-                    <input type="text" id="in-nick" class="input-pill" placeholder="your nickname">
+                    <div class="editor-fields">
+                        <div class="text-bar-row">
+                            <div class="text-bar-pill" id="nick-pill">
+                                <input type="text" id="in-nick" class="text-bar-input" placeholder="your nickname">
+                            </div>
+                        </div>
+                        <div id="text-bars-container" class="text-bars-stack"></div>
+                    </div>
                     <div class="style-group">
-                        <input type="text" id="in-top" class="input-pill" placeholder="top text"
-                            oninput="sync('p-top', this.value)">
-                        <input type="text" id="in-bottom" class="input-pill" placeholder="bottom text"
-                            oninput="sync('p-bottom', this.value)">
                         <div class="select-wrapper">
                             <select id="font-select-input" class="font-select" onchange="updateStyle('font', this.value)">
                                 <optgroup label="english">
@@ -683,19 +842,19 @@
                             <div class="select-arrow">↓</div>
                         </div>
                         <div class="style-row">
-                            <span>fill</span><input type="color" value="#D141C8"
+                            <span class="lang-en">fill</span><span class="lang-ko">채우기</span><input type="color" value="#FFF566"
                                 oninput="updateStyle('color', this.value)" class="color-input-hidden">
-                            <span style="margin-left:20px;">stroke</span><input type="color" value="#000000"
+                            <span class="lang-en" style="margin-left:20px;">stroke</span><span class="lang-ko" style="margin-left:20px;">윤곽선</span><input type="color" value="#000000"
                                 oninput="updateStyle('strokeColor', this.value)" class="color-input-hidden">
                         </div>
-                        <div class="style-row"><span>size</span><input type="range" min="1" max="4" step="0.1" value="2"
+                        <div class="style-row"><span class="lang-en">size</span><span class="lang-ko">크기</span><input type="range" min="1" max="4" step="0.1" value="2.5"
                                 oninput="updateStyle('fontSize', this.value + 'rem')" class="slider-input"></div>
-                        <div class="style-row"><span>stroke</span><input type="range" min="0" max="6" step="0.5"
-                                value="1.5" oninput="updateStyle('strokeWidth', this.value + 'px')"
+                        <div class="style-row"><span class="lang-en">stroke</span><span class="lang-ko">윤곽선 두께</span><input type="range" min="0" max="6" step="0.5"
+                                value="0" oninput="updateStyle('strokeWidth', this.value + 'px')"
                                 class="slider-input"></div>
                     </div>
                     <button class="btn-large" id="btn-publish" onclick="saveMeme()"
-                        style="width:100%; max-width:400px;">publish meme</button>
+                        style="width:100%; max-width:400px; background:#000 !important; color:#fff !important;"><span class="lang-en">publish meme</span><span class="lang-ko">밈 게시하기</span></button>
                 </div>
             </div>
         </div>
@@ -716,17 +875,12 @@
                 <div class="control-btns"><button class="circle-btn" onclick="historyBack()">←</button></div>
             </div>
             <div class="content-body">
-                <!-- 한/영 간격 확보를 위해 margin-bottom을 30px로 상향 조정 -->
-                <h1 class="big-title" style="font-size: 2.2rem; margin-bottom: 30px;">you might feel like your humor is
-                    one-of-a-kind, but our data shows that great minds really do think alike. we are all more
-                    connected—and perhaps less unique—than we imagine. explore the patterns and see where you fit in.
-                </h1>
-                <h1 class="big-title-ko" style="font-size: 1.8rem;">사실 우리의 생각은 놀라울 정도로 닮아 있습니다. 우리는 생각보다 서로 덜 특별하고, 더 많이
-                    연결되어 있습니다. 당신의 생각이 어떤 집단적 패턴 속에 있는지 직접 확인해 보세요.</h1>
+                <h1 class="big-title lang-en" style="font-size: 2.2rem; margin-bottom: 30px;">We all love to think that our humor, our daily struggles, and our late-night thoughts are completely unique. But is that really true? Looking through this archive, you will see something amazing. Completely different people came to this site, looked at the same image, and wrote similar words as you. We are way more connected than we think.</h1>
+                <h1 class="big-title-ko lang-ko" style="font-size: 1.8rem;">우리는 모두 자신의 유머 감각, 일상의 고민, 그리고 밤늦게 드는 생각들이 아주 특별하고 독창적이라고 믿고 싶어 합니다. 하지만 정말 그럴까요? 이 아카이브를 둘러보다 보면 흥미로운 사실을 발견하게 됩니다. 완전히 다른 사람들이 이 사이트에 들어와 같은 이미지를 보고, 당신과 비슷한 말을 남겼다는 것입니다. 우리는 생각보다 훨씬 더 서로 연결되어 있습니다.</h1>
             </div>
             <div class="view-mode-tabs"><button class="tab-btn active" id="tab-icons"
-                    onclick="setMode('icons')">memes</button><button class="tab-btn" id="tab-nicks"
-                    onclick="setMode('nicks')">nicknames</button></div>
+                    onclick="setMode('icons')"><span class="lang-en">memes</span><span class="lang-ko">밈</span></button><button class="tab-btn" id="tab-nicks"
+                    onclick="setMode('nicks')"><span class="lang-en">nicknames</span><span class="lang-ko">별명</span></button></div>
             <div id="archive-list" class="archive-grid grid-cols-full"></div>
         </div>
         <div class="pane hidden" id="archive-right" style="width: 0%;">
@@ -735,15 +889,20 @@
             </div>
             <div class="editor-box">
                 <div id="det-meta" style="margin-bottom:20px; font-size:1.2rem; text-align:center; opacity:0.8;"></div>
-                <div class="canvas-container" style="margin-top:0;"><img id="det-img">
+                <div class="canvas-container" style="margin-top:0;" id="det-canvas-container"><img id="det-img">
                     <div id="det-top" class="meme-text t-top"></div>
                     <div id="det-bottom" class="meme-text t-bottom"></div>
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-top:20px; gap:20px; width:100%; max-width:320px;">
                     <button id="btn-so-true" style="background:#fff !important; color:#000 !important; border:none; flex:1; height:36px !important; font-size:0.8rem; white-space:nowrap; padding:0 12px; cursor:pointer; border-radius:20px;">so true: <span id="count-true">0</span></button>
-                    <button id="btn-just-passing" style="background:#fff !important; color:#000 !important; border:none; flex:1; height:36px !important; font-size:0.8rem; white-space:nowrap; padding:0 12px; cursor:pointer; border-radius:20px;">passing by: <span id="count-passing">0</span></button>
+                    <button id="btn-download-meme" onclick="downloadMeme()" style="background:#fff !important; color:#000 !important; border:none; flex:1; height:36px !important; font-size:0.8rem; white-space:nowrap; padding:0 12px; cursor:pointer; border-radius:20px;"><span class="lang-en">download</span><span class="lang-ko">다운로드</span></button>
                 </div>
                 <div id="det-ai-info" style="text-align:center;"></div>
+                <!-- Others made section -->
+                <div id="det-others-section" style="width:100%; margin-top:32px; display:none;">
+                    <p id="det-others-label" style="font-size:0.85rem; opacity:0.6; margin-bottom:12px; text-align:left;"><span class="lang-en">what others made with this image...</span><span class="lang-ko">같은 이미지로 만든 다른 밈들...</span></p>
+                    <div id="det-others-grid" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; width:100%;"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -793,38 +952,339 @@
         };
 
 
-        const templates = ['image 1.jpeg', 'image 2.jpg', 'image 3.png', 'image 4.jpeg', 'image 5.jpeg', 'image 6.jpg', 'image 7.png', 'image 8.png', 'image 9.jpeg', 'image 10.jpeg', 'image 11.jpeg', 'image 12.jpeg', 'image 13.jpeg', 'image 14.jpeg', 'image 15.jpeg', 'image 16.jpeg', 'image 17.jpeg', 'image 18.jpeg', 'image 19.jpeg', 'image 20.jpeg', 'image 21.jpeg', 'image 22.jpeg', 'image 23.jpeg', 'image 24.jpeg', 'image 25.jpeg', 'image 26.jpeg', 'image 27.jpeg'];
+        const imageTemplates = ['image 1.jpeg', 'image 2.jpg', 'image 3.png', 'image 4.jpeg', 'image 5.jpeg', 'image 6.jpg', 'image 7.png', 'image 8.png', 'image 28.jpg', 'image 29.jpg', 'image 30.jpg', 'image 31.jpg', 'image 32.jpg', 'image 33.jpg', 'image 34.jpg', 'image 35.jpg', 'image 36.jpg', 'image 37.jpg', 'image 38.jpg', 'image 39.jpg', 'image 41.jpg', 'image 42.jpg'];
+        const gifTemplates = ['gifimage 1.gif', 'gifimage 2.gif', 'gifimage 3.gif', 'gifimage 4.gif', 'gifimage 5.gif', 'gifimage 6.gif'];
+        let createTypeMode = 'images';
         const magicPalette = ['#D141C8', '#41D1A5', '#D17C41', '#416ED1', '#D1C841', '#A541D1', '#7CD141', '#E5D3B3', '#FF4B2B', '#FFD700', '#1E90FF', '#32CD32'];
 
 
 
         let currentMode = 'icons'; let currentMemes = []; let activeTemplate = ''; let sceneHistory = ['scene-home'];
-        let currentStyles = { color: '#D141C8', font: "'Arial Narrow'", strokeWidth: '1.5px', strokeColor: '#000000', fontSize: '2rem' };
+        let archiveLoadError = null;
+        let memesUnsubscribe = null;
+        let currentStyles = { color: '#FFF566', font: "'Arial Narrow'", strokeWidth: '0px', strokeColor: '#000000', fontSize: '2.5rem' };
+
+        let memeTexts = [];
+        let selectedTextId = null;
+
+        function applyTextStroke(el, strokeWidth, strokeColor) {
+            const w = parseFloat(strokeWidth) || 0;
+            if (w <= 0) {
+                el.style.webkitTextStroke = '';
+            } else {
+                el.style.webkitTextStroke = `${strokeWidth} ${strokeColor}`;
+            }
+        }
+
+        function syncCanvasTextElement(t) {
+            const container = document.getElementById('editor-canvas-container');
+            if (!container) return;
+            let el = document.getElementById(t.id);
+            if (!el) {
+                renderEditorTexts();
+                el = document.getElementById(t.id);
+            }
+            if (!el) return;
+            el.textContent = t.text;
+            el.style.fontFamily = t.font;
+            el.style.color = t.color;
+            el.style.fontSize = t.fontSize;
+            applyTextStroke(el, t.strokeWidth, t.strokeColor);
+        }
+
+        function addTextBar(shouldFocus = true) {
+            const id = 'txt_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            const newText = {
+                id: id,
+                text: '',
+                x: 50,
+                y: 30 + (memeTexts.length * 20) % 60,
+                font: currentStyles.font || "'Arial Narrow'",
+                color: currentStyles.color || "#FFF566",
+                fontSize: currentStyles.fontSize || "2.5rem",
+                strokeColor: currentStyles.strokeColor || "#000000",
+                strokeWidth: currentStyles.strokeWidth || "0px"
+            };
+            memeTexts.push(newText);
+            renderTextBars();
+            renderEditorTexts();
+            if (shouldFocus) {
+                const newInput = document.getElementById('input_' + id);
+                if (newInput) newInput.focus();
+            }
+        }
+
+        function removeTextBar(id) {
+            if (memeTexts.length <= 1) return; // minimum 1 bar
+            memeTexts = memeTexts.filter(item => item.id !== id);
+            if (selectedTextId === id) selectText(null);
+            renderTextBars();
+            renderEditorTexts();
+        }
+
+        function updateTextFromBar(id, val) {
+            const t = memeTexts.find(item => item.id === id);
+            if (!t) return;
+            t.text = val;
+            syncCanvasTextElement(t);
+            const pill = document.getElementById('input_' + id)?.closest('.text-bar-pill');
+            if (pill) pill.classList.remove('input-error');
+        }
+
+        function renderTextBars() {
+            const container = document.getElementById('text-bars-container');
+            if (!container) return;
+            container.innerHTML = '';
+            memeTexts.forEach((t) => {
+                const row = document.createElement('div');
+                row.className = 'text-bar-row';
+
+                const pill = document.createElement('div');
+                pill.className = 'text-bar-pill';
+
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'text-bar-input';
+                input.id = 'input_' + t.id;
+                input.placeholder = document.documentElement.getAttribute('lang') === 'ko' ? '텍스트 입력' : 'enter text here';
+                input.value = t.text;
+                input.addEventListener('input', function() { updateTextFromBar(t.id, this.value); });
+                input.addEventListener('focus', function() { selectText(t.id); });
+                pill.appendChild(input);
+
+                if (memeTexts.length > 1) {
+                    const xBtn = document.createElement('button');
+                    xBtn.type = 'button';
+                    xBtn.className = 'text-bar-x';
+                    xBtn.innerHTML = '×';
+                    xBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        removeTextBar(t.id);
+                    });
+                    pill.appendChild(xBtn);
+                }
+
+                row.appendChild(pill);
+                container.appendChild(row);
+            });
+
+            const addLink = document.createElement('button');
+            addLink.type = 'button';
+            addLink.className = 'add-text-link';
+            addLink.id = 'add-text-link';
+            addLink.textContent = document.documentElement.getAttribute('lang') === 'ko' ? '텍스트 추가' : 'add text';
+            addLink.addEventListener('click', addTextBar);
+            container.appendChild(addLink);
+        }
+
+        function selectText(id) {
+            selectedTextId = id;
+            
+            if (!id) return;
+
+            const t = memeTexts.find(item => item.id === id);
+            if (t) {
+                const fontInput = document.getElementById('font-select-input');
+                if (fontInput) fontInput.value = t.font;
+
+                const fillInputs = document.querySelectorAll('input[type="color"]');
+                if (fillInputs.length >= 2) {
+                    fillInputs[0].value = t.color;
+                    fillInputs[1].value = t.strokeColor;
+                }
+
+                const sizeSlider = document.querySelector('input[type="range"][min="1"][max="4"]');
+                if (sizeSlider) sizeSlider.value = parseFloat(t.fontSize);
+
+                const strokeSlider = document.querySelector('input[type="range"][min="0"][max="6"]');
+                if (strokeSlider) strokeSlider.value = parseFloat(t.strokeWidth);
+            }
+        }
+
+        function renderEditorTexts() {
+            const container = document.getElementById('editor-canvas-container');
+            if (!container) return;
+            
+            const existing = container.querySelectorAll('.draggable-text');
+            existing.forEach(el => el.remove());
+
+            memeTexts.forEach(t => {
+                const el = document.createElement('div');
+                el.className = 'draggable-text';
+                el.id = t.id;
+
+                el.style.left = t.x + '%';
+                el.style.top = t.y + '%';
+                el.textContent = t.text;
+                el.style.fontFamily = t.font;
+                el.style.color = t.color;
+                el.style.fontSize = t.fontSize;
+                applyTextStroke(el, t.strokeWidth, t.strokeColor);
+
+                el.style.webkitUserSelect = 'none';
+                el.style.userSelect = 'none';
+
+                el.addEventListener('mousedown', (e) => startDrag(e, t.id));
+                el.addEventListener('touchstart', (e) => startDrag(e, t.id), { passive: false });
+                el.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    selectText(t.id);
+                });
+
+                container.appendChild(el);
+            });
+        }
+
+        let activeDragId = null;
+        let dragStartX = 0;
+        let dragStartY = 0;
+        let elementStartX = 0;
+        let elementStartY = 0;
+
+        function startDrag(e, id) {
+            selectText(id);
+            activeDragId = id;
+            const t = memeTexts.find(item => item.id === id);
+            if (!t) return;
+
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+            dragStartX = clientX;
+            dragStartY = clientY;
+            elementStartX = t.x;
+            elementStartY = t.y;
+
+            if (e.cancelable) e.preventDefault();
+
+            document.addEventListener('mousemove', onDrag);
+            document.addEventListener('mouseup', endDrag);
+            document.addEventListener('touchmove', onDrag, { passive: false });
+            document.addEventListener('touchend', endDrag);
+        }
+
+        function onDrag(e) {
+            if (!activeDragId) return;
+
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+            const container = document.getElementById('editor-canvas-container');
+            if (!container) return;
+            const rect = container.getBoundingClientRect();
+
+            const dx = clientX - dragStartX;
+            const dy = clientY - dragStartY;
+
+            const dxPercent = (dx / rect.width) * 100;
+            const dyPercent = (dy / rect.height) * 100;
+
+            let newX = elementStartX + dxPercent;
+            let newY = elementStartY + dyPercent;
+
+            newX = Math.max(0, Math.min(100, newX));
+            newY = Math.max(0, Math.min(100, newY));
+
+            const t = memeTexts.find(item => item.id === activeDragId);
+            if (t) {
+                t.x = newX;
+                t.y = newY;
+                const el = document.getElementById(activeDragId);
+                if (el) {
+                    el.style.left = newX + '%';
+                    el.style.top = newY + '%';
+                }
+            }
+
+            if (e.cancelable) e.preventDefault();
+        }
+
+        function endDrag() {
+            activeDragId = null;
+            document.removeEventListener('mousemove', onDrag);
+            document.removeEventListener('mouseup', endDrag);
+            document.removeEventListener('touchmove', onDrag);
+            document.removeEventListener('touchend', endDrag);
+        }
 
 
         function renderTemplates() {
             const list = document.getElementById('create-template-list');
             if (!list) return;
-            list.innerHTML = templates.map(t => `<div class="create-template-card" onclick="showEditor('${t}')"><img src="${t}" onerror="this.src='https://via.placeholder.com/600?text=${t}'"></div>`).join('');
+            const currentList = createTypeMode === 'images' ? imageTemplates : gifTemplates;
+            list.innerHTML = currentList.map(t => `<div class="create-template-card" onclick="showEditor('${t}')"><img src="${t}" onerror="this.src='https://via.placeholder.com/600?text=${t}'"></div>`).join('');
         }
 
+        function setCreateType(type) {
+            createTypeMode = type;
+            document.getElementById('tab-create-images').classList.toggle('active', type === 'images');
+            document.getElementById('tab-create-gifs').classList.toggle('active', type === 'gifs');
+            renderTemplates();
+        }
+
+
+        function isFirebaseConfigured() {
+            return firebaseConfig.apiKey && firebaseConfig.apiKey !== 'YOUR_API_KEY_HERE';
+        }
+
+        function setArchiveMessage(message, isError = false) {
+            const list = document.getElementById('archive-list');
+            if (!list) return;
+            list.innerHTML = `<div class="archive-message${isError ? ' error' : ''}">${message}</div>`;
+        }
 
         async function init() {
             renderTemplates();
             colorPanes('pane-home');
+            
+            const container = document.getElementById('editor-canvas-container');
+            if (container) {
+                container.addEventListener('click', (e) => {
+                    if (e.target.id === 'editor-canvas-container' || e.target.id === 'edit-img') {
+                        selectText(null);
+                    }
+                });
+            }
+
+            const inNick = document.getElementById('in-nick');
+            if (inNick) {
+                inNick.addEventListener('input', () => {
+                    document.getElementById('nick-pill')?.classList.remove('input-error');
+                });
+            }
+
+            if (!isFirebaseConfigured()) {
+                archiveLoadError = 'firebase api key is missing. open index.html and replace YOUR_API_KEY_HERE with your key from firebase console → project settings → your apps.';
+                setArchiveMessage(archiveLoadError, true);
+                console.error(archiveLoadError);
+                return;
+            }
+
             try {
                 await auth.signInAnonymously();
                 loadData();
-            } catch (e) { console.error(e); }
+            } catch (e) {
+                archiveLoadError = 'could not connect to firebase: ' + (e.message || e.code || 'unknown error');
+                console.error(e);
+                setArchiveMessage(archiveLoadError, true);
+                loadData();
+            }
         }
 
 
         function loadData() {
-            collectionRef.onSnapshot(snap => {
+            if (memesUnsubscribe) memesUnsubscribe();
+
+            memesUnsubscribe = collectionRef.onSnapshot(snap => {
+                archiveLoadError = null;
                 currentMemes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 currentMemes.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
                 renderArchive();
-            }, err => console.error(err));
+            }, err => {
+                archiveLoadError = 'could not load memes: ' + (err.message || err.code || 'unknown error');
+                console.error(err);
+                setArchiveMessage(archiveLoadError, true);
+            });
         }
 
 
@@ -854,6 +1314,22 @@
         }
 
 
+        function toggleLang(e) { 
+            e.stopPropagation(); 
+            const html = document.documentElement; 
+            const newLang = html.getAttribute('lang') === 'en' ? 'ko' : 'en';
+            html.setAttribute('lang', newLang); 
+            
+            const inNick = document.getElementById('in-nick');
+            if (inNick) inNick.placeholder = newLang === 'ko' ? '당신의 별명' : 'your nickname';
+            
+            document.querySelectorAll('.text-bar-input:not(#in-nick)').forEach(inp => {
+                inp.placeholder = newLang === 'ko' ? '텍스트 입력' : 'enter text here';
+            });
+            
+            const addLink = document.getElementById('add-text-link');
+            if (addLink) addLink.textContent = newLang === 'ko' ? '텍스트 추가' : 'add text';
+        }
         function historyBack() { if (sceneHistory.length > 1) { sceneHistory.pop(); go(sceneHistory[sceneHistory.length - 1]); } }
         function toggleDrop(id) { document.querySelectorAll('.dropdown-menu').forEach(m => m.id === id ? m.classList.toggle('show') : m.classList.remove('show')); }
 
@@ -862,17 +1338,36 @@
             activeTemplate = t;
             document.getElementById('edit-img').src = t;
             document.getElementById('create-template-list').classList.add('hidden');
+            const createTabs = document.getElementById('create-view-mode-tabs');
+            if(createTabs) createTabs.classList.add('hidden');
             document.getElementById('create-editor-view').classList.remove('hidden');
+            document.getElementById('create-left-default').classList.add('hidden');
+            document.getElementById('create-left-instructions').classList.remove('hidden');
             colorPanes('create-left', 'create-right');
-            
-            // Apply current styles immediately
+
+            const inNick = document.getElementById('in-nick');
+            if (inNick) {
+                inNick.value = '';
+                document.getElementById('nick-pill')?.classList.remove('input-error');
+            }
+
+            memeTexts = [];
+            selectedTextId = null;
+            addTextBar(false);
+
             Object.keys(currentStyles).forEach(prop => updateStyle(prop, currentStyles[prop]));
+
+            setTimeout(() => inNick?.focus(), 0);
         }
 
 
         function hideEditor() {
             document.getElementById('create-template-list').classList.remove('hidden');
+            const createTabs = document.getElementById('create-view-mode-tabs');
+            if(createTabs) createTabs.classList.remove('hidden');
             document.getElementById('create-editor-view').classList.add('hidden');
+            document.getElementById('create-left-instructions').classList.add('hidden');
+            document.getElementById('create-left-default').classList.remove('hidden');
         }
 
 
@@ -880,71 +1375,96 @@
 
 
         function updateStyle(prop, val) {
-            currentStyles[prop] = val;
-            const targets = [document.getElementById('p-top'), document.getElementById('p-bottom')];
-            targets.forEach(t => {
-                if (prop === 'color') t.style.color = val;
-                if (prop === 'font') t.style.fontFamily = val;
-                if (prop === 'fontSize') t.style.fontSize = val;
-                if (prop === 'strokeWidth' || prop === 'strokeColor') t.style.webkitTextStroke = `${currentStyles.strokeWidth} ${currentStyles.strokeColor}`;
-            });
+            // Update global currentStyles so new added text uses it
+            if (prop === 'font') currentStyles.font = val;
+            if (prop === 'color') currentStyles.color = val;
+            if (prop === 'fontSize') currentStyles.fontSize = val;
+            if (prop === 'strokeColor') currentStyles.strokeColor = val;
+            if (prop === 'strokeWidth') currentStyles.strokeWidth = val;
+
+            if (selectedTextId) {
+                // If text is selected, update it specifically!
+                const t = memeTexts.find(item => item.id === selectedTextId);
+                if (t) {
+                    if (prop === 'font') t.font = val;
+                    if (prop === 'color') t.color = val;
+                    if (prop === 'fontSize') t.fontSize = val;
+                    if (prop === 'strokeColor') t.strokeColor = val;
+                    if (prop === 'strokeWidth') t.strokeWidth = val;
+
+                    // Update DOM element directly for instant feedback!
+                    const el = document.getElementById(selectedTextId);
+                    if (el) {
+                        if (prop === 'font') el.style.fontFamily = val;
+                        if (prop === 'color') el.style.color = val;
+                        if (prop === 'fontSize') el.style.fontSize = val;
+                        if (prop === 'strokeWidth' || prop === 'strokeColor') {
+                            applyTextStroke(el, t.strokeWidth, t.strokeColor);
+                        }
+                    }
+                }
+            }
         }
 
 
         async function saveMeme() {
             const inNick = document.getElementById('in-nick');
-            const inTop = document.getElementById('in-top');
-            const inBottom = document.getElementById('in-bottom');
             const btn = document.getElementById('btn-publish');
 
-            // Reset styles
-            [inNick, inTop, inBottom].forEach(el => {
-                el.style.border = "none";
-                el.placeholder = el.id === 'in-nick' ? "your nickname" : (el.id === 'in-top' ? "top text" : "bottom text");
+            inNick.placeholder = document.documentElement.getAttribute('lang') === 'ko' ? '당신의 별명' : 'your nickname';
+            document.getElementById('nick-pill')?.classList.remove('input-error');
+            document.querySelectorAll('#text-bars-container .text-bar-pill').forEach(pill => {
+                pill.classList.remove('input-error');
             });
 
             const nick = inNick.value.trim();
-            const top = inTop.value.trim();
-            const bottom = inBottom.value.trim();
-
             let hasError = false;
 
             if (!nick) {
-                inNick.style.border = "2px solid #ff4444";
-                inNick.placeholder = "nickname required!";
+                document.getElementById('nick-pill')?.classList.add('input-error');
                 hasError = true;
             }
-            if (!top && !bottom) {
-                inTop.style.border = "2px solid #ff4444";
-                inBottom.style.border = "2px solid #ff4444";
-                inTop.placeholder = "text required!";
-                inBottom.placeholder = "text required!";
-                hasError = true;
-            }
+
+            memeTexts.forEach(t => {
+                if (!t.text.trim()) {
+                    const inp = document.getElementById('input_' + t.id);
+                    const pill = inp?.closest('.text-bar-pill');
+                    if (pill) pill.classList.add('input-error');
+                    hasError = true;
+                }
+            });
+
+            if (memeTexts.length === 0) hasError = true;
 
             if (hasError) return;
 
             if (btn.disabled) return;
             btn.disabled = true;
-            btn.innerText = "publishing...";
+            btn.disabled = true; btn.innerHTML = '<span class="lang-en">publishing...</span><span class="lang-ko">게시 중...</span>';
 
             try {
                 if (!auth.currentUser) await auth.signInAnonymously();
+                
+                // For legacy support: topText will be first text, bottomText will be second text
+                const topVal = memeTexts[0] ? memeTexts[0].text : "";
+                const bottomVal = memeTexts[1] ? memeTexts[1].text : "";
+
                 await collectionRef.add({
                     template: activeTemplate,
                     nickname: nick,
-                    topText: top,
-                    bottomText: bottom,
+                    texts: memeTexts,
+                    topText: topVal,
+                    bottomText: bottomVal,
                     styles: JSON.parse(JSON.stringify(currentStyles)),
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
-                btn.disabled = false; btn.innerText = "publish meme";
+                btn.disabled = false; btn.innerHTML = '<span class="lang-en">publish meme</span><span class="lang-ko">밈 게시하기</span>';
                 go('scene-archive');
                 return;
             } catch (e) {
                 console.error(e);
                 alert("Failed to publish.");
-                btn.disabled = false; btn.innerText = "publish meme";
+                btn.disabled = false; btn.innerHTML = '<span class="lang-en">publish meme</span><span class="lang-ko">밈 게시하기</span>';
                 return;
             }
         }
@@ -959,9 +1479,10 @@
             if (!p) return ''; 
             let path = p.startsWith('image ') ? p : 'image ' + p;
             // Common fix for .jpg vs .jpeg mismatches
-            if (path.endsWith('.jpg') && !templates.includes(path)) {
+            const allTemplates = [...imageTemplates, ...gifTemplates];
+            if (path.endsWith('.jpg') && !allTemplates.includes(path)) {
                 let alt = path.replace('.jpg', '.jpeg');
-                if (templates.includes(alt)) return alt;
+                if (allTemplates.includes(alt)) return alt;
             }
             return path;
         }
@@ -970,13 +1491,37 @@
         function renderArchive() {
             const list = document.getElementById('archive-list'); if (!list) return;
             list.innerHTML = '';
+
+            if (archiveLoadError) {
+                setArchiveMessage(archiveLoadError, true);
+                return;
+            }
+
+            if (currentMemes.length === 0) {
+                setArchiveMessage('no memes yet — be the first to publish one!');
+                return;
+            }
+
             if (currentMode === 'nicks') {
                 list.innerHTML = currentMemes.map(m => `<div class="nick-card" onclick='openDetail(${JSON.stringify(m).replace(/'/g, "&apos;")})'>${m.nickname || 'anon'}</div>`).join('');
             } else {
                 currentMemes.forEach(m => {
                     const s = m.styles || currentStyles;
                     const card = document.createElement('div'); card.className = 'meme-thumb-card'; card.onclick = () => openDetail(m);
-                    card.innerHTML = `<img src="${fixPath(m.template)}"><div class="meme-text t-top" style="font-size:0.85rem; font-family:${s.font}; color:${s.color}; -webkit-text-stroke:0.35px ${s.strokeColor}">${m.topText || ''}</div><div class="meme-text t-bottom" style="font-size:0.85rem; font-family:${s.font}; color:${s.color}; -webkit-text-stroke:0.35px ${s.strokeColor}">${m.bottomText || ''}</div>`;
+                    
+                    let textHtml = '';
+                    if (m.texts && m.texts.length > 0) {
+                        textHtml = m.texts.map(t => {
+                            const sizeVal = parseFloat(t.fontSize) * 0.45;
+                            const sw = parseFloat(t.strokeWidth) || 0;
+                            const strokeStyle = sw > 0 ? `-webkit-text-stroke:${sw * 0.35}px ${t.strokeColor};` : '';
+                            return `<div class="meme-text" style="pointer-events:none; position:absolute; left:${t.x}%; top:${t.y}%; transform:translate(-50%,-50%); font-size:${sizeVal}rem; font-family:${t.font}; color:${t.color}; ${strokeStyle} white-space:nowrap; max-width:98%;">${t.text}</div>`;
+                        }).join('');
+                    } else {
+                        textHtml = `<div class="meme-text t-top" style="font-size:0.85rem; font-family:${s.font}; color:${s.color}; -webkit-text-stroke:0.35px ${s.strokeColor}">${m.topText || ''}</div><div class="meme-text t-bottom" style="font-size:0.85rem; font-family:${s.font}; color:${s.color}; -webkit-text-stroke:0.35px ${s.strokeColor}">${m.bottomText || ''}</div>`;
+                    }
+
+                    card.innerHTML = `<img src="${fixPath(m.template)}">${textHtml}`;
                     list.appendChild(card);
                 });
             }
@@ -988,10 +1533,63 @@
             document.getElementById('archive-right').classList.remove('hidden');
             document.getElementById('archive-right').style.width = '50%';
             document.getElementById('archive-list').className = 'archive-grid grid-cols-half';
+
+            // Scroll detail pane back to top
+            const rightPane = document.getElementById('archive-right');
+            if (rightPane) rightPane.scrollTop = 0;
             
             document.getElementById('det-img').src = fixPath(m.template);
-            document.getElementById('det-top').innerText = m.topText || '';
-            document.getElementById('det-bottom').innerText = m.bottomText || '';
+            
+            // Clear any previously generated dynamic elements from detail canvas
+            const detCanvas = document.getElementById('det-canvas-container');
+            if (detCanvas) {
+                const existingDet = detCanvas.querySelectorAll('.draggable-text');
+                existingDet.forEach(el => el.remove());
+                
+                // Also clear any dynamic .meme-text nodes we added in previous dynamic opens
+                const dynamicTexts = detCanvas.querySelectorAll('.meme-text');
+                dynamicTexts.forEach(el => {
+                    if (el.id !== 'det-top' && el.id !== 'det-bottom') {
+                        el.remove();
+                    }
+                });
+            }
+
+            if (m.texts && m.texts.length > 0) {
+                // Hide legacy text layers
+                document.getElementById('det-top').innerText = '';
+                document.getElementById('det-bottom').innerText = '';
+                
+                // Render each dynamic text
+                m.texts.forEach(t => {
+                    const el = document.createElement('div');
+                    el.className = 'meme-text'; // Uses absolute positioning and base styles
+                    el.style.pointerEvents = 'none';
+                    el.style.position = 'absolute';
+                    el.style.left = t.x + '%';
+                    el.style.top = t.y + '%';
+                    el.style.transform = 'translate(-50%, -50%)';
+                    el.style.width = 'auto';
+                    el.style.whiteSpace = 'nowrap';
+                    el.style.maxWidth = '95%';
+                    
+                    el.textContent = t.text;
+                    el.style.fontFamily = t.font;
+                    el.style.color = t.color;
+                    el.style.fontSize = t.fontSize;
+                    applyTextStroke(el, t.strokeWidth, t.strokeColor);
+                    detCanvas.appendChild(el);
+                });
+            } else {
+                // Legacy render fallback
+                document.getElementById('det-top').innerText = m.topText || '';
+                document.getElementById('det-bottom').innerText = m.bottomText || '';
+                const s = m.styles || currentStyles;
+                [document.getElementById('det-top'), document.getElementById('det-bottom')].forEach(t => {
+                    t.style.color = s.color; t.style.fontFamily = s.font; t.style.fontSize = s.fontSize;
+                    applyTextStroke(t, s.strokeWidth, s.strokeColor);
+                });
+            }
 
             // Add class for mobile reordering
             document.getElementById('scene-archive').classList.add('detail-active');
@@ -1008,27 +1606,62 @@
 
             // Counters
             document.getElementById('count-true').innerText = m.likesTrue || 0;
-            document.getElementById('count-passing').innerText = m.likesPassing || 0;
 
             // Voting handlers
             document.getElementById('btn-so-true').onclick = () => voteMeme(m.id, 'likesTrue');
-            document.getElementById('btn-just-passing').onclick = () => voteMeme(m.id, 'likesPassing');
             
             // Format Timestamp
             let timeStr = "";
             if (m.timestamp) {
-                const date = m.timestamp.toDate ? m.timestamp.toDate() : new Date(m.timestamp);
-                timeStr = ` | ${date.toLocaleDateString()} ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
+                let date;
+                if (m.timestamp.toDate) {
+                    date = m.timestamp.toDate();
+                } else if (m.timestamp.seconds) {
+                    date = new Date(m.timestamp.seconds * 1000);
+                } else {
+                    date = new Date(m.timestamp);
+                }
+                
+                if (!isNaN(date)) {
+                    timeStr = ` | ${date.toLocaleDateString()} ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
+                }
             }
             document.getElementById('det-meta').innerText = `by ${m.nickname || 'anon'}${timeStr}`;
 
             // Hide AI info box completely
             document.getElementById('det-ai-info').innerHTML = '';
 
-            const s = m.styles || currentStyles;
-            [document.getElementById('det-top'), document.getElementById('det-bottom')].forEach(t => {
-                t.style.color = s.color; t.style.fontFamily = s.font; t.style.fontSize = s.fontSize; t.style.webkitTextStroke = `${s.strokeWidth} ${s.strokeColor}`;
-            });
+            // Render "what others made" section
+            const othersSection = document.getElementById('det-others-section');
+            const othersGrid = document.getElementById('det-others-grid');
+            const template = fixPath(m.template);
+            const others = currentMemes.filter(x => fixPath(x.template) === template && x.id !== m.id);
+            if (others.length > 0) {
+                othersGrid.innerHTML = '';
+                others.forEach(o => {
+                    const s = o.styles || currentStyles;
+                    const card = document.createElement('div');
+                    card.className = 'meme-thumb-card';
+                    card.onclick = () => openDetail(o);
+                    let textHtml = '';
+                    if (o.texts && o.texts.length > 0) {
+                        textHtml = o.texts.map(t => {
+                            const sz = parseFloat(t.fontSize) * 0.35;
+                            const sw = parseFloat(t.strokeWidth) || 0;
+                            const strokeStyle = sw > 0 ? `-webkit-text-stroke:${sw * 0.3}px ${t.strokeColor};` : '';
+                            return `<div style="pointer-events:none; position:absolute; left:${t.x}%; top:${t.y}%; transform:translate(-50%,-50%); font-size:${sz}rem; font-family:${t.font}; color:${t.color}; ${strokeStyle} white-space:nowrap; max-width:98%;">${t.text}</div>`;
+                        }).join('');
+                    } else {
+                        textHtml = `<div class="meme-text t-top" style="font-size:0.7rem; font-family:${s.font}; color:${s.color};">${o.topText||''}</div><div class="meme-text t-bottom" style="font-size:0.7rem; font-family:${s.font}; color:${s.color};">${o.bottomText||''}</div>`;
+                    }
+                    card.innerHTML = `<img src="${fixPath(o.template)}" style="width:100%; height:100%; object-fit:cover; display:block;">${textHtml}`;
+                    othersGrid.appendChild(card);
+                });
+                othersSection.style.display = 'block';
+            } else {
+                othersSection.style.display = 'none';
+            }
+
             if (window.innerWidth <= 768) {
                 const al = document.getElementById("archive-left");
                 const ar = document.getElementById("archive-right");
@@ -1051,6 +1684,24 @@
             }
         }
 
+        async function downloadMeme() {
+            const container = document.getElementById('det-canvas-container');
+            if (!container) return;
+            const btn = document.getElementById('btn-download-meme');
+            if (btn) btn.style.opacity = '0.5';
+            try {
+                const canvas = await html2canvas(container, { useCORS: true, allowTaint: true, scale: 2 });
+                const link = document.createElement('a');
+                link.download = 'meme.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            } catch(e) {
+                console.error('Download failed:', e);
+            } finally {
+                if (btn) btn.style.opacity = '1';
+            }
+        }
+
 
         function closeDetail() {
             document.getElementById('archive-left').style.width = '100%';
@@ -1065,9 +1716,8 @@
         window.onload = init;
 
 
-        /* ── Cursor Meme Trail Logic ── */
+        /* ── Cursor Meme Trail ── */
         (function () {
-            // Ordered sequence – cycles through all 27 images in a specific pattern
             const trailOrder = [
                 'image 1.jpeg', 'image 5.jpeg', 'image 3.png',
                 'image 7.png', 'image 2.jpg', 'image 10.jpeg',
@@ -1080,7 +1730,6 @@
                 'image 18.jpeg', 'image 26.jpeg', 'image 27.jpeg'
             ];
 
-            // Size alternation: small, medium, small-wide, etc.
             const sizes = [
                 { w: 64, h: 64 },
                 { w: 80, h: 80 },
@@ -1092,7 +1741,7 @@
             let trailIndex = 0;
             let sizeIndex = 0;
             let lastX = -999, lastY = -999;
-            const MIN_DIST = 48; // px between consecutive images
+            const MIN_DIST = 48;
 
             function isHomeActive() {
                 const scene = document.getElementById('scene-home');
@@ -1110,7 +1759,6 @@
                 img.src = src;
                 img.width = size.w;
                 img.height = size.h;
-                // Centre the image on the cursor
                 img.style.left = (x - size.w / 2) + 'px';
                 img.style.top = (y - size.h / 2) + 'px';
 
@@ -1136,9 +1784,6 @@
                 }
             });
 
-            // Clear trail whenever we leave the home scene
-            const origGo = window.go || (() => { });
-            // Patch go() to clear trail on scene switch away from home
             const _goOrig = go;
             window.go = function (id) {
                 if (id !== 'scene-home') clearTrail();
