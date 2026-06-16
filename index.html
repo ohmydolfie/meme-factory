@@ -15,9 +15,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@300&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Kirang+Haerang&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo&display=swap" rel="stylesheet">
     <link
         href="https://fonts.googleapis.com/css2?family=Anton&family=Bangers&family=Black+Han+Sans&family=Do+Hyeon&family=Gamja+Flower&family=Gothic+A1:wght@900&family=Hi+Melody&family=Jua&family=Lobster&family=Nanum+Brush+Script&family=Nanum+Pen+Script&family=Noto+Sans+KR:wght@900&family=Oswald:wght@700&family=Pacifico&family=Permanent+Marker&family=Press+Start+2P&family=Righteous&family=Roboto+Condensed:wght@700&family=Song+Myung&family=Yeon+Sung&family=Nanum+Gothic:wght@800&family=Nanum+Myeongjo:wght@800&family=Poor+Story&family=Single+Day&family=Sunflower:wght@700&family=Gaegu&display=swap"
         rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fonts-archive/AppleSDGothicNeo/AppleSDGothicNeo.css" type="text/css"/>
     <style>
         :root {
             --white: #FFFFFF;
@@ -38,6 +42,10 @@
 
         html[lang="en"] .lang-ko { display: none !important; }
         html[lang="ko"] .lang-en { display: none !important; }
+
+        .lang-ko {
+            font-family: "AppleSDGothicNeo", "Apple SD Gothic Neo", sans-serif;
+        }
 
         body,
         html {
@@ -74,6 +82,34 @@
 
         .pane::-webkit-scrollbar {
             display: none;
+        }
+
+        /* Show thin white scrollbars on create and archive pages */
+        #scene-create .pane,
+        #archive-left {
+            scrollbar-width: thin;
+            scrollbar-color: #fff transparent;
+        }
+
+        #scene-create .pane::-webkit-scrollbar,
+        #archive-left::-webkit-scrollbar {
+            display: block;
+            width: 3px;
+        }
+
+        #scene-create .pane::-webkit-scrollbar-track,
+        #archive-left::-webkit-scrollbar-track,
+        #scene-create .pane::-webkit-scrollbar-track:hover,
+        #archive-left::-webkit-scrollbar-track:hover {
+            background: transparent;
+        }
+
+        #scene-create .pane::-webkit-scrollbar-thumb,
+        #archive-left::-webkit-scrollbar-thumb,
+        #scene-create .pane::-webkit-scrollbar-thumb:hover,
+        #archive-left::-webkit-scrollbar-thumb:hover {
+            background-color: #fff;
+            border-radius: 3px;
         }
 
 
@@ -172,10 +208,10 @@
         }
 
         .big-title-ko {
-            font-size: clamp(1.9rem, 4.5vw, 6rem);
-            line-height: 1.1;
-            letter-spacing: -1px;
-            margin-bottom: 30px;
+            font-size: clamp(2.2rem, 5.5vw, 7rem);
+            line-height: 1.3;
+            letter-spacing: -1.5px;
+            margin-bottom: 20px;
             font-weight: normal;
             word-break: keep-all;
         }
@@ -219,6 +255,34 @@
             display: block;
         }
 
+        .instruction-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .instruction-list li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            white-space: nowrap;
+        }
+
+        .step-circle {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 32px;
+            height: 32px;
+            background-color: white;
+            color: black;
+            border-radius: 50%;
+            font-weight: normal;
+            margin-right: 12px;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
         /* ── Mobile Responsiveness ── */
         @media (max-width: 768px) {
             .scene {
@@ -254,7 +318,7 @@
                 overflow-y: visible;
             }
             .big-title { font-size: 2.2rem; }
-            .big-title-ko { font-size: 1.8rem; }
+            .big-title-ko { font-size: 2.2rem; }
             .sub-text { font-size: 1.2rem; }
             
             .archive-grid.grid-cols-full {
@@ -490,7 +554,8 @@
             font-size: var(--ui-font-size);
         }
 
-        .tab-btn.active {
+        .tab-btn.active,
+        .tab-btn:active {
             background: #000;
             color: #fff;
         }
@@ -591,7 +656,8 @@
         .add-text-link {
             width: 100%;
             font-size: 0.95rem;
-            color: #999;
+            color: black;
+            text-decoration: underline;
             cursor: pointer;
             margin-top: 2px;
             padding-left: 20px;
@@ -717,12 +783,12 @@
             <!-- Nav bar: z-index 20 so it's always on top -->
             <div class="top-bar-area" style="position: relative; z-index: 20;">
                 <div class="nav-pill-wrapper">
-                    <div class="white-pill" onclick="toggleDrop('drop-home')"><span>home</span><div style="display:flex; align-items:center;"><span onclick="toggleLang(event)" style="margin-right:8px; cursor:pointer;"><span class="lang-en" style="opacity:0.5;">kr</span><span class="lang-ko" style="opacity:0.5;">en</span></span><span>↓</span></div></div>
+                    <div class="white-pill" onclick="toggleDrop('drop-home')"><span class="lang-en">home</span><span class="lang-ko">홈</span><div style="display:flex; align-items:center;"><span onclick="toggleLang(event)" style="margin-right:8px; cursor:pointer;"><span class="lang-en" style="opacity:0.5;">en</span><span class="lang-ko" style="opacity:0.5;">kr</span></span><span>↓</span></div></div>
                     <div id="drop-home" class="dropdown-menu">
-                        <div class="dropdown-item" onclick="go('scene-home')">home</div>
-                        <div class="dropdown-item" onclick="go('scene-create')">create</div>
-                        <div class="dropdown-item" onclick="go('scene-archive')">archive</div>
-                        <div class="dropdown-item" onclick="go('scene-about')">about</div>
+                        <div class="dropdown-item" onclick="go('scene-home')"><span class="lang-en">home</span><span class="lang-ko">홈</span></div>
+                        <div class="dropdown-item" onclick="go('scene-create')"><span class="lang-en">create</span><span class="lang-ko">만들기</span></div>
+                        <div class="dropdown-item" onclick="go('scene-archive')"><span class="lang-en">archive</span><span class="lang-ko">아카이브</span></div>
+                        <div class="dropdown-item" onclick="go('scene-about')"><span class="lang-en">about</span><span class="lang-ko">소개</span></div>
                     </div>
                 </div>
             </div>
@@ -741,30 +807,30 @@
         <div class="pane" id="pane-about">
             <div class="top-bar-area">
                 <div class="nav-pill-wrapper">
-                    <div class="white-pill" onclick="toggleDrop('drop-about')"><span>about</span><span>↓</span></div>
+                    <div class="white-pill" onclick="toggleDrop('drop-about')"><span class="lang-en">about</span><span class="lang-ko">소개</span><span>↓</span></div>
                     <div id="drop-about" class="dropdown-menu">
-                        <div class="dropdown-item" onclick="go('scene-home')">home</div>
-                        <div class="dropdown-item" onclick="go('scene-create')">create</div>
-                        <div class="dropdown-item" onclick="go('scene-archive')">archive</div>
+                        <div class="dropdown-item" onclick="go('scene-home')"><span class="lang-en">home</span><span class="lang-ko">홈</span></div>
+                        <div class="dropdown-item" onclick="go('scene-create')"><span class="lang-en">create</span><span class="lang-ko">만들기</span></div>
+                        <div class="dropdown-item" onclick="go('scene-archive')"><span class="lang-en">archive</span><span class="lang-ko">아카이브</span></div>
                     </div>
                 </div>
                 <div class="control-btns"><button class="circle-btn" onclick="historyBack()">←</button></div>
             </div>
             <div class="content-body">
-                <div class="sub-text lang-en">
+                <div class="big-title lang-en">
                     Meme Factory explores how our <span class="highlight">thoughts and feelings are connected.</span> We believe that if everyone were
                     completely different, memes wouldn't be funny. A meme only works because other <span class="highlight">people feel the exact
                     same way you do.</span> We often think <span class="highlight">we are independent,</span> but we actually share a lot of the <span class="highlight">same patterns</span>
                     in our humor and daily lives. This project is a space to see how your perspective fits into a larger
                     human pattern, showing that <span class="highlight">we are all more connected than we realize.</span>
                 </div>
-                <div class="sub-text lang-ko">
+                <div class="big-title-ko lang-ko">
                     밈 팩토리는 우리의 <span class="highlight">생각이 어떻게 서로 연결되어 있는지</span> 탐구하는 프로젝트입니다. 만약 우리가 모두 완전히 <span class="highlight">다른 생각</span>을 한다면, ‘밈’은 존재할 수 없을 거예요. 밈은 내가 느끼는
                     감정을 다른 사람도 똑같이 느낄 때 비로소 재미있어지기 때문입니다. <span class="highlight">우리는 스스로 독립적이라고</span> 생각하지만, 사실 일상 속에서 <span class="highlight">비슷한 감정을 공유하며</span> 살아갑니다.
                     이 프로젝트는 나의 유머와 생각이 다른 사람들과 어떻게 연결되는지 확인해보는 공간입니다. 이를 통해 <span class="highlight">우리가 서로 얼마나 닮아 있는지</span> 즐겁게 확인해보세요.
                 </div>
-                <div class="lang-en" style="margin-top: 60px; font-size: 1.3rem; opacity: 0.8;">credits: kamilya & diana, media studio 1 (2026)</div>
-                <div class="lang-ko" style="margin-top: 60px; font-size: 1.3rem; opacity: 0.8;">크레딧: 카밀랴 & 다이아나, 미디어 스튜디오 1 (2026)</div>
+                <div class="lang-en" style="margin-top: 60px; font-size: 1.3rem; opacity: 0.8;">credits: kamilya & diana, KMU, media studio 1 (2026)</div>
+                <div class="lang-ko" style="margin-top: 60px; font-size: 1.3rem; opacity: 0.8;">크레딧: 카밀랴 & 다이아나, 국민대학교, 미디어 스튜디오 1 (2026)</div>
             </div>
         </div>
     </div>
@@ -774,11 +840,11 @@
         <div class="pane" id="create-left" style="width: 50%;">
             <div class="top-bar-area">
                 <div class="nav-pill-wrapper">
-                    <div class="white-pill" onclick="toggleDrop('drop-create')"><span>create</span><span>↓</span></div>
+                    <div class="white-pill" onclick="toggleDrop('drop-create')"><span class="lang-en">create</span><span class="lang-ko">만들기</span><span>↓</span></div>
                     <div id="drop-create" class="dropdown-menu">
-                        <div class="dropdown-item" onclick="go('scene-home')">home</div>
-                        <div class="dropdown-item" onclick="go('scene-archive')">archive</div>
-                        <div class="dropdown-item" onclick="go('scene-about')">about</div>
+                        <div class="dropdown-item" onclick="go('scene-home')"><span class="lang-en">home</span><span class="lang-ko">홈</span></div>
+                        <div class="dropdown-item" onclick="go('scene-archive')"><span class="lang-en">archive</span><span class="lang-ko">아카이브</span></div>
+                        <div class="dropdown-item" onclick="go('scene-about')"><span class="lang-en">about</span><span class="lang-ko">소개</span></div>
                     </div>
                 </div>
             </div>
@@ -787,25 +853,32 @@
                 <h1 class="big-title-ko lang-ko">이미지를 선택하고 나만의 밈을 만들어보세요.</h1>
             </div>
             <div class="content-body hidden" id="create-left-instructions">
-                <h1 class="big-title lang-en" style="font-size: 1.8rem; line-height: 1.5;">
-                    1. make a funny nickname<br>
-                    2. add text and move it around<br>
-                    3. play with styles<br>
-                    4. all done!
-                </h1>
-                <h1 class="big-title-ko lang-ko" style="font-size: 1.8rem; line-height: 1.5;">
-                    1. 웃긴 별명 만들기<br>
-                    2. 텍스트 추가하고 여기저기 움직이기<br>
-                    3. 스타일 가지고 놀기<br>
-                    4. 완료!
-                </h1>
+                <div class="big-title lang-en">
+                    <ul class="instruction-list">
+                        <li>1. create name</li>
+                        <li>2. add text</li>
+                        <li>3. choose text</li>
+                        <li>4. resize</li>
+                        <li>5. choose color</li>
+                        <li>6. publish meme</li>
+                    </ul>
+                </div>
+                <div class="big-title-ko lang-ko">
+                    <ul class="instruction-list">
+                        <li>1. 이름 만들기</li>
+                        <li>2. 텍스트 추가</li>
+                        <li>3. 텍스트 선택</li>
+                        <li>4. 크기 조절</li>
+                        <li>5. 색상 선택</li>
+                        <li>6. 밈 게시</li>
+                    </ul>
+                </div>
             </div>
         </div>
         <div class="pane" id="create-right" style="width: 50%;">
-            <div id="create-view-mode-tabs" class="top-bar-area">
+            <div id="create-view-mode-tabs" class="top-bar-area" style="display: none;">
                 <div class="view-mode-tabs" style="padding: 0; width: 100%;">
-                    <button class="tab-btn active" id="tab-create-images" onclick="setCreateType('images')"><span class="lang-en">images</span><span class="lang-ko">이미지</span></button>
-                    <button class="tab-btn" id="tab-create-gifs" onclick="setCreateType('gifs')"><span class="lang-en">gifs</span><span class="lang-ko">GIF</span></button>
+                    <button class="tab-btn active" id="tab-create-images" onclick="setCreateType('images')"><span class="lang-en">memes</span><span class="lang-ko">밈</span></button>
                 </div>
             </div>
             <div id="create-template-list" class="create-list"></div>
@@ -834,9 +907,9 @@
                                     <option value="Anton">Anton</option>
                                 </optgroup>
                                 <optgroup label="korean">
-                                    <option value="'Black Han Sans'">Black Han Sans</option>
-                                    <option value="'Do Hyeon'">Do Hyeon</option>
-                                    <option value="'Nanum Pen Script'">Nanum Pen Script</option>
+                                    <option value="'Kirang Haerang'">Kirang Haerang</option>
+                                    <option value="'Noto Sans KR'">Noto Sans KR</option>
+                                    <option value="'Nanum Myeongjo'">Nanum Myeongjo</option>
                                 </optgroup>
                             </select>
                             <div class="select-arrow">↓</div>
@@ -865,18 +938,17 @@
         <div class="pane" id="archive-left" style="width: 100%;">
             <div class="top-bar-area">
                 <div class="nav-pill-wrapper">
-                    <div class="white-pill" onclick="toggleDrop('drop-arch')"><span>archive</span><span>↓</span></div>
+                    <div class="white-pill" onclick="toggleDrop('drop-arch')"><span class="lang-en">archive</span><span class="lang-ko">아카이브</span><span>↓</span></div>
                     <div id="drop-arch" class="dropdown-menu">
-                        <div class="dropdown-item" onclick="go('scene-home')">home</div>
-                        <div class="dropdown-item" onclick="go('scene-create')">create</div>
-                        <div class="dropdown-item" onclick="go('scene-about')">about</div>
+                        <div class="dropdown-item" onclick="go('scene-home')"><span class="lang-en">home</span><span class="lang-ko">홈</span></div>
+                        <div class="dropdown-item" onclick="go('scene-create')"><span class="lang-en">create</span><span class="lang-ko">만들기</span></div>
+                        <div class="dropdown-item" onclick="go('scene-about')"><span class="lang-en">about</span><span class="lang-ko">소개</span></div>
                     </div>
                 </div>
-                <div class="control-btns"><button class="circle-btn" onclick="historyBack()">←</button></div>
             </div>
-            <div class="content-body">
-                <h1 class="big-title lang-en" style="font-size: 2.2rem; margin-bottom: 30px;">We all love to think that our humor, our daily struggles, and our late-night thoughts are completely unique. But is that really true? Looking through this archive, you will see something amazing. Completely different people came to this site, looked at the same image, and wrote similar words as you. We are way more connected than we think.</h1>
-                <h1 class="big-title-ko lang-ko" style="font-size: 1.8rem;">우리는 모두 자신의 유머 감각, 일상의 고민, 그리고 밤늦게 드는 생각들이 아주 특별하고 독창적이라고 믿고 싶어 합니다. 하지만 정말 그럴까요? 이 아카이브를 둘러보다 보면 흥미로운 사실을 발견하게 됩니다. 완전히 다른 사람들이 이 사이트에 들어와 같은 이미지를 보고, 당신과 비슷한 말을 남겼다는 것입니다. 우리는 생각보다 훨씬 더 서로 연결되어 있습니다.</h1>
+            <div class="content-body" style="padding-top: 20px;">
+                <h1 class="big-title lang-en">We all love to think that our humor, our daily struggles, and our late-night thoughts are completely unique. But is that really true? Looking through this archive, you will see something amazing. Completely different people came to this site, looked at the same image, and wrote similar words as you. We are way more connected than we think.</h1>
+                <h1 class="big-title-ko lang-ko">우리는 모두 자신의 유머 감각, 일상의 고민, 그리고 밤늦게 드는 생각들이 아주 특별하고 독창적이라고 믿고 싶어 합니다. 하지만 정말 그럴까요? 이 아카이브를 둘러보다 보면 흥미로운 사실을 발견하게 됩니다. 완전히 다른 사람들이 이 사이트에 들어와 같은 이미지를 보고, 당신과 비슷한 말을 남겼다는 것입니다. 우리는 생각보다 훨씬 더 서로 연결되어 있습니다.</h1>
             </div>
             <div class="view-mode-tabs"><button class="tab-btn active" id="tab-icons"
                     onclick="setMode('icons')"><span class="lang-en">memes</span><span class="lang-ko">밈</span></button><button class="tab-btn" id="tab-nicks"
@@ -884,7 +956,7 @@
             <div id="archive-list" class="archive-grid grid-cols-full"></div>
         </div>
         <div class="pane hidden" id="archive-right" style="width: 0%;">
-            <div class="top-bar-area">
+            <div class="top-bar-area" style="justify-content: flex-end;">
                 <div class="control-btns"><button class="circle-btn" onclick="closeDetail()">×</button></div>
             </div>
             <div class="editor-box">
@@ -894,8 +966,8 @@
                     <div id="det-bottom" class="meme-text t-bottom"></div>
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-top:20px; gap:20px; width:100%; max-width:320px;">
-                    <button id="btn-so-true" style="background:#fff !important; color:#000 !important; border:none; flex:1; height:36px !important; font-size:0.8rem; white-space:nowrap; padding:0 12px; cursor:pointer; border-radius:20px;">so true: <span id="count-true">0</span></button>
-                    <button id="btn-download-meme" onclick="downloadMeme()" style="background:#fff !important; color:#000 !important; border:none; flex:1; height:36px !important; font-size:0.8rem; white-space:nowrap; padding:0 12px; cursor:pointer; border-radius:20px;"><span class="lang-en">download</span><span class="lang-ko">다운로드</span></button>
+                    <button class="tab-btn" id="btn-so-true" style="flex:1;"><span class="lang-en">so true: </span><span class="lang-ko">공감: </span><span id="count-true" style="margin-left: 4px;">0</span></button>
+                    <button class="tab-btn" id="btn-download-meme" onclick="downloadMeme()" style="flex:1;"><span class="lang-en">download</span><span class="lang-ko">다운로드</span></button>
                 </div>
                 <div id="det-ai-info" style="text-align:center;"></div>
                 <!-- Others made section -->
@@ -1672,15 +1744,19 @@
         }
 
         async function voteMeme(docId, type) {
+            const spanId = type === 'likesTrue' ? 'count-true' : 'count-passing';
+            const span = document.getElementById(spanId);
+            // Optimistic update
+            if(span) span.innerText = parseInt(span.innerText) + 1;
+
             try {
                 await collectionRef.doc(docId).update({
                     [type]: firebase.firestore.FieldValue.increment(1)
                 });
-                const spanId = type === 'likesTrue' ? 'count-true' : 'count-passing';
-                const span = document.getElementById(spanId);
-                if(span) span.innerText = parseInt(span.innerText) + 1;
             } catch (e) {
                 console.error("Vote failed:", e);
+                // Revert on failure
+                if(span) span.innerText = parseInt(span.innerText) - 1;
             }
         }
 
