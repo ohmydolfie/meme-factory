@@ -18,6 +18,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Kirang+Haerang&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100..900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
     <link
         href="https://fonts.googleapis.com/css2?family=Anton&family=Bangers&family=Black+Han+Sans&family=Do+Hyeon&family=Gamja+Flower&family=Gothic+A1:wght@900&family=Hi+Melody&family=Jua&family=Lobster&family=Nanum+Brush+Script&family=Nanum+Pen+Script&family=Noto+Sans+KR:wght@900&family=Oswald:wght@700&family=Pacifico&family=Permanent+Marker&family=Press+Start+2P&family=Righteous&family=Roboto+Condensed:wght@700&family=Song+Myung&family=Yeon+Sung&family=Nanum+Gothic:wght@800&family=Nanum+Myeongjo:wght@800&family=Poor+Story&family=Single+Day&family=Sunflower:wght@700&family=Gaegu&display=swap"
         rel="stylesheet">
@@ -388,22 +389,30 @@
         }
 
 
+        #create-editor-view {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #create-editor-view.hidden {
+            display: none;
+        }
+
         .editor-box {
             display: flex;
             flex-direction: column;
-            gap: 16px;
-            padding: 0 20px 60px 20px;
-            padding-top: 12px;
-            padding-top: calc(12px + env(safe-area-inset-top));
+            gap: 10px;
+            /* align canvas top with the left side's white pill top */
+            padding: calc(12px + env(safe-area-inset-top)) 20px 30px 20px;
             align-items: center;
         }
 
         .editor-fields {
-            width: 100%;
-            max-width: 400px;
+            width: min(calc(50vw - 40px), calc(100vh - 420px), 600px);
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 6px;
         }
 
         .text-bars-stack {
@@ -415,7 +424,7 @@
 
         .input-pill {
             width: 100%;
-            max-width: 400px;
+            max-width: 600px;
             padding: 0 20px;
             border-radius: 50px;
             border: none;
@@ -424,11 +433,10 @@
         }
 
         .style-group {
-            width: 100%;
-            max-width: 400px;
+            width: min(calc(50vw - 40px), calc(100vh - 420px), 600px);
             display: flex;
             flex-direction: column;
-            gap: 14px;
+            gap: 8px;
         }
 
         .style-row {
@@ -474,9 +482,10 @@
 
 
         .canvas-container {
-            width: 100%;
-            max-width: 400px;
+            /* Size by whichever is smaller: available width or available height after controls */
+            width: min(calc(50vw - 40px), calc(100vh - 420px), 600px);
             aspect-ratio: 1/1;
+            flex-shrink: 0;
             background: #000;
             position: relative;
             overflow: hidden;
@@ -521,15 +530,17 @@
             background: #fff;
             appearance: none;
             -webkit-appearance: none;
+            overflow: hidden; /* hides track edges beyond thumb at min position */
         }
 
         .slider-input::-webkit-slider-thumb {
             -webkit-appearance: none;
-            height: 20px;
-            width: 20px;
+            height: 14px;
+            width: 14px;
             border-radius: 50%;
             background: #000;
-            margin-top: -6px;
+            margin-top: -3px;
+            box-shadow: -100vw 0 0 100vw #000; /* fills the track to the left black, hiding white */
         }
 
 
@@ -556,6 +567,12 @@
 
         .tab-btn.active,
         .tab-btn:active {
+            background: #000;
+            color: #fff;
+        }
+
+        #btn-so-true:hover,
+        #btn-download-meme:hover {
             background: #000;
             color: #fff;
         }
@@ -814,7 +831,7 @@
                         <div class="dropdown-item" onclick="go('scene-archive')"><span class="lang-en">archive</span><span class="lang-ko">아카이브</span></div>
                     </div>
                 </div>
-                <div class="control-btns"><button class="circle-btn" onclick="historyBack()">←</button></div>
+
             </div>
             <div class="content-body">
                 <div class="big-title lang-en">
@@ -847,6 +864,7 @@
                         <div class="dropdown-item" onclick="go('scene-about')"><span class="lang-en">about</span><span class="lang-ko">소개</span></div>
                     </div>
                 </div>
+                <div class="control-btns"><button id="btn-back-editor" class="circle-btn hidden" onclick="hideEditor()">←</button></div>
             </div>
             <div class="content-body" id="create-left-default">
                 <h1 class="big-title lang-en">choose a picture and make your own meme.</h1>
@@ -883,9 +901,6 @@
             </div>
             <div id="create-template-list" class="create-list"></div>
             <div id="create-editor-view" class="hidden">
-                <div class="top-bar-area" style="position: absolute; right: 0; top: 0; justify-content: flex-end; width: auto; z-index: 5000;">
-                    <div class="control-btns"><button class="circle-btn" onclick="hideEditor()">←</button></div>
-                </div>
                 <div class="editor-box">
                     <div class="canvas-container" id="editor-canvas-container">
                         <img id="edit-img" src="">
@@ -901,15 +916,15 @@
                     <div class="style-group">
                         <div class="select-wrapper">
                             <select id="font-select-input" class="font-select" onchange="updateStyle('font', this.value)">
+                                <option value="" disabled selected style="color:#aaa;">Aa</option>
                                 <optgroup label="english">
-                                    <option value="'Arial Narrow'">Arial Narrow</option>
-                                    <option value="Impact">Impact</option>
-                                    <option value="Anton">Anton</option>
+                                    <option value="'Bebas Neue'">Bebas Neue</option>
+                                    <option value="'Instrument Serif'">Instrument Serif</option>
                                 </optgroup>
-                                <optgroup label="korean">
-                                    <option value="'Kirang Haerang'">Kirang Haerang</option>
-                                    <option value="'Noto Sans KR'">Noto Sans KR</option>
-                                    <option value="'Nanum Myeongjo'">Nanum Myeongjo</option>
+                                <optgroup label="한국어">
+                                    <option value="'Kirang Haerang'">키랑 해랑</option>
+                                    <option value="'Noto Sans KR'">노토 산스 KR</option>
+                                    <option value="'Nanum Myeongjo'">나눔 명조</option>
                                 </optgroup>
                             </select>
                             <div class="select-arrow">↓</div>
@@ -927,7 +942,7 @@
                                 class="slider-input"></div>
                     </div>
                     <button class="btn-large" id="btn-publish" onclick="saveMeme()"
-                        style="width:100%; max-width:400px; background:#000 !important; color:#fff !important;"><span class="lang-en">publish meme</span><span class="lang-ko">밈 게시하기</span></button>
+                        style="width:min(calc(50vw - 40px), calc(100vh - 420px), 600px); background:#000 !important; color:#fff !important;"><span class="lang-en">publish meme</span><span class="lang-ko">밈 게시하기</span></button>
                 </div>
             </div>
         </div>
@@ -1415,6 +1430,7 @@
             document.getElementById('create-editor-view').classList.remove('hidden');
             document.getElementById('create-left-default').classList.add('hidden');
             document.getElementById('create-left-instructions').classList.remove('hidden');
+            document.getElementById('btn-back-editor').classList.remove('hidden');
             colorPanes('create-left', 'create-right');
 
             const inNick = document.getElementById('in-nick');
@@ -1440,6 +1456,7 @@
             document.getElementById('create-editor-view').classList.add('hidden');
             document.getElementById('create-left-instructions').classList.add('hidden');
             document.getElementById('create-left-default').classList.remove('hidden');
+            document.getElementById('btn-back-editor').classList.add('hidden');
         }
 
 
@@ -1575,7 +1592,19 @@
             }
 
             if (currentMode === 'nicks') {
-                list.innerHTML = currentMemes.map(m => `<div class="nick-card" onclick='openDetail(${JSON.stringify(m).replace(/'/g, "&apos;")})'>${m.nickname || 'anon'}</div>`).join('');
+                const uniqueNicks = [];
+                const nickMap = new Map();
+                currentMemes.forEach(m => {
+                    const n = m.nickname || 'anon';
+                    if (!nickMap.has(n)) {
+                        nickMap.set(n, m);
+                        uniqueNicks.push(n);
+                    }
+                });
+                list.innerHTML = uniqueNicks.map(n => {
+                    const m = nickMap.get(n);
+                    return `<div class="nick-card" onclick='openDetail(${JSON.stringify(m).replace(/'/g, "&apos;")})'>${n}</div>`;
+                }).join('');
             } else {
                 currentMemes.forEach(m => {
                     const s = m.styles || currentStyles;
@@ -1706,8 +1735,23 @@
             // Render "what others made" section
             const othersSection = document.getElementById('det-others-section');
             const othersGrid = document.getElementById('det-others-grid');
-            const template = fixPath(m.template);
-            const others = currentMemes.filter(x => fixPath(x.template) === template && x.id !== m.id);
+            const othersLabel = document.getElementById('det-others-label');
+            
+            let others = [];
+            if (currentMode === 'nicks') {
+                const nickname = m.nickname || 'anon';
+                others = currentMemes.filter(x => (x.nickname || 'anon') === nickname && x.id !== m.id);
+                if (othersLabel) {
+                    othersLabel.innerHTML = `<span class="lang-en">also made by ${nickname}...</span><span class="lang-ko">${nickname}님이 만든 다른 밈들...</span>`;
+                }
+            } else {
+                const template = fixPath(m.template);
+                others = currentMemes.filter(x => fixPath(x.template) === template && x.id !== m.id);
+                if (othersLabel) {
+                    othersLabel.innerHTML = `<span class="lang-en">what others made with this image...</span><span class="lang-ko">같은 이미지로 만든 다른 밈들...</span>`;
+                }
+            }
+
             if (others.length > 0) {
                 othersGrid.innerHTML = '';
                 others.forEach(o => {
@@ -1746,17 +1790,29 @@
         async function voteMeme(docId, type) {
             const spanId = type === 'likesTrue' ? 'count-true' : 'count-passing';
             const span = document.getElementById(spanId);
-            // Optimistic update
-            if(span) span.innerText = parseInt(span.innerText) + 1;
+            
+            // Safe parse
+            let currentVal = 0;
+            if (span) {
+                currentVal = parseInt(span.textContent, 10);
+                if (isNaN(currentVal)) currentVal = 0;
+                span.textContent = currentVal + 1; // Optimistic update
+            }
 
             try {
+                // Ensure auth before voting
+                if (!auth.currentUser) await auth.signInAnonymously();
+                
                 await collectionRef.doc(docId).update({
                     [type]: firebase.firestore.FieldValue.increment(1)
                 });
             } catch (e) {
                 console.error("Vote failed:", e);
+                alert("Vote failed: " + e.message + "\n\n(If it says insufficient permissions, you need to update your Firestore Security Rules!)");
                 // Revert on failure
-                if(span) span.innerText = parseInt(span.innerText) - 1;
+                if (span) {
+                    span.textContent = currentVal;
+                }
             }
         }
 
@@ -1791,6 +1847,48 @@
         window.onclick = (e) => { if (!e.target.closest('.nav-pill-wrapper')) document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show')); };
         window.onload = init;
 
+
+        /* ── Background Music ── */
+        (function() {
+            let started = false;
+            let melody1Count = 0;
+
+            const audioA = new Audio('melody1.mp3');
+            const audioB = new Audio('melody2.mp3');
+            audioA.volume = 0.3;
+            audioB.volume = 0.15;
+
+            // melody1 ended: play it again if < 3 times, otherwise switch to melody2
+            audioA.addEventListener('ended', () => {
+                melody1Count++;
+                if (melody1Count < 3) {
+                    audioA.currentTime = 0;
+                    audioA.play();
+                } else {
+                    audioB.currentTime = 0;
+                    audioB.play();
+                }
+            });
+
+            // melody2 ended: reset counter, back to melody1
+            audioB.addEventListener('ended', () => {
+                melody1Count = 0;
+                audioA.currentTime = 0;
+                audioA.play();
+            });
+
+            function startMusic() {
+                if (started) return;
+                started = true;
+                melody1Count = 0;
+                audioA.play().catch(() => {});
+                document.removeEventListener('click', startMusic);
+                document.removeEventListener('touchstart', startMusic);
+            }
+
+            document.addEventListener('click', startMusic);
+            document.addEventListener('touchstart', startMusic);
+        })();
 
         /* ── Cursor Meme Trail ── */
         (function () {
