@@ -30,6 +30,7 @@
             --bar-height: 46px;
             --ui-font-size: 1.1rem;
             --meme-yellow: #FFF566;
+            --editor-w: min(calc(50vw - 40px), calc(100vh - 420px), 600px);
         }
 
         * {
@@ -191,6 +192,8 @@
             font-size: 1.2rem;
             cursor: pointer;
             color: var(--black);
+            -webkit-appearance: none;
+            appearance: none;
         }
 
 
@@ -286,6 +289,9 @@
 
         /* ── Mobile Responsiveness ── */
         @media (max-width: 768px) {
+            :root {
+                --editor-w: min(calc(100vw - 40px), calc(100vh - 420px));
+            }
             .scene {
                 flex-direction: column !important;
                 overflow-y: auto !important;
@@ -311,6 +317,10 @@
             }
             #archive-right .canvas-container {
                 background: transparent !important;
+                width: calc(100vw - 40px) !important;
+            }
+            #archive-right .button-row {
+                max-width: calc(100vw - 40px) !important;
             }
             .pane {
                 width: 100% !important;
@@ -343,7 +353,11 @@
             padding: 0 40px;
             border-radius: 50px;
             background: var(--white);
+            color: var(--black);
+            -webkit-appearance: none;
+            appearance: none;
             border: none;
+            flex-shrink: 0;
             font-size: var(--ui-font-size);
             cursor: pointer;
             margin-top: 20px;
@@ -409,10 +423,11 @@
         }
 
         .editor-fields {
-            width: min(calc(50vw - 40px), calc(100vh - 420px), 600px);
+            width: var(--editor-w);
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 10px;
+            flex-shrink: 0;
         }
 
         .text-bars-stack {
@@ -430,13 +445,15 @@
             border: none;
             font-size: var(--ui-font-size);
             height: var(--bar-height);
+            flex-shrink: 0;
         }
 
         .style-group {
-            width: min(calc(50vw - 40px), calc(100vh - 420px), 600px);
+            width: var(--editor-w);
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
+            flex-shrink: 0;
         }
 
         .style-row {
@@ -483,12 +500,16 @@
 
         .canvas-container {
             /* Size by whichever is smaller: available width or available height after controls */
-            width: min(calc(50vw - 40px), calc(100vh - 420px), 600px);
+            width: var(--editor-w);
             aspect-ratio: 1/1;
             flex-shrink: 0;
             background: #000;
             position: relative;
             overflow: hidden;
+        }
+
+        #editor-canvas-container {
+            margin-bottom: 15px; /* Adds extra space before the nickname bar */
         }
 
         .canvas-container img {
@@ -563,6 +584,9 @@
             align-items: center;
             justify-content: center;
             font-size: var(--ui-font-size);
+            color: var(--black);
+            -webkit-appearance: none;
+            appearance: none;
         }
 
         .tab-btn.active,
@@ -942,7 +966,7 @@
                                 class="slider-input"></div>
                     </div>
                     <button class="btn-large" id="btn-publish" onclick="saveMeme()"
-                        style="width:min(calc(50vw - 40px), calc(100vh - 420px), 600px); background:#000 !important; color:#fff !important;"><span class="lang-en">publish meme</span><span class="lang-ko">밈 게시하기</span></button>
+                        style="width:var(--editor-w); background:#000 !important; color:#fff !important;"><span class="lang-en">publish meme</span><span class="lang-ko">밈 게시하기</span></button>
                 </div>
             </div>
         </div>
@@ -980,7 +1004,7 @@
                     <div id="det-top" class="meme-text t-top"></div>
                     <div id="det-bottom" class="meme-text t-bottom"></div>
                 </div>
-                <div style="display:flex; justify-content:space-between; margin-top:20px; gap:20px; width:100%; max-width:320px;">
+                <div class="button-row" style="display:flex; justify-content:space-between; margin-top:20px; gap:20px; width:100%; max-width:600px;">
                     <button class="tab-btn" id="btn-so-true" style="flex:1;"><span class="lang-en">so true: </span><span class="lang-ko">공감: </span><span id="count-true" style="margin-left: 4px;">0</span></button>
                     <button class="tab-btn" id="btn-download-meme" onclick="downloadMeme()" style="flex:1;"><span class="lang-en">download</span><span class="lang-ko">다운로드</span></button>
                 </div>
